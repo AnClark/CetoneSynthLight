@@ -27,12 +27,17 @@ set (SRC_BACKEND
 )
 
 dpf_add_plugin (${PROJECT_NAME}
-    TARGETS vst2 vst3 lv2 clap
+    TARGETS vst2 vst3 lv2 clap jack
     FILES_DSP
         src/CetoneSynth.cpp
         src/CetoneSynthDPF.cpp
         src/CetoneSynthMain.cpp
         src/CetoneSynthPlugin.cpp
         ${SRC_BACKEND}
+    FILES_UI
+        src/CetoneUI.cpp
+        src/CetoneUIHelper.cpp
+        src/Images/CetoneArtwork.cpp
+        src/Fonts/CetoneFonts.cpp
 )
 
