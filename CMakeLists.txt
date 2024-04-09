@@ -5,6 +5,9 @@ project (cetone_synth_light
     LANGUAGES C CXX
 )
 
+# Explicitily specify C++ standard to prevent build error on Github CI - macOS build
+set (CMAKE_CXX_STANDARD 17)
+
 add_subdirectory (dpf)
 
 include_directories (   
