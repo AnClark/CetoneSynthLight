@@ -13,7 +13,7 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - uses: distrho/dpf-makefile-action@v1
+        - uses: anclark/dpf-cmake-action@main
           with:
             target: ${{ matrix.target }}
   
@@ -26,7 +26,7 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - uses: distrho/dpf-makefile-action@v1
+        - uses: anclark/dpf-cmake-action@main
           with:
             target: ${{ matrix.target }}
   
@@ -39,7 +39,7 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - uses: distrho/dpf-makefile-action@v1
+        - uses: anclark/dpf-cmake-action@main
           with:
             target: ${{ matrix.target }}
   
@@ -49,7 +49,7 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - uses: distrho/dpf-makefile-action@v1
+        - uses: anclark/dpf-cmake-action@main
           with:
             target: pluginval
   
@@ -59,6 +59,6 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - uses: distrho/dpf-makefile-action@v1
+        - uses: anclark/dpf-cmake-action@main
           with:
             target: source
