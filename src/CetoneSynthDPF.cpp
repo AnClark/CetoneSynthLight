@@ -9,8 +9,11 @@ void CCetoneSynth::initParameter(uint32_t index, Parameter& parameter)
     parameter.ranges.max = 1.0f;
     parameter.ranges.def = 0.5f;
 
+    // Must set parameter.symbol, this is the unique ID of each parameter.
+    // If not set, you can neither save presets nor reset to factory default, in VST3 and CLAP!
     char buff[256];
     getParameterName(index, buff);
+    parameter.symbol = String(buff).replace(' ', '_').replace('.', '_');
     parameter.name = String(buff);
 
     switch (index) {
