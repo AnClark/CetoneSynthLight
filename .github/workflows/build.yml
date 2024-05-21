@@ -127,7 +127,7 @@ jobs:
       #       WSTD_DL3Y/*.tar.gz
 
   macos-universal:
-    runs-on: macos-11
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v3
         with:
