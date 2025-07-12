@@ -4,6 +4,8 @@
 #include "ImageWidgets.hpp"
 #include "NanoVG.hpp"
 
+#include "Widgets/TestImGuiUI.hpp"
+
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
 using DGL_NAMESPACE::ImageKnob;
@@ -42,6 +44,8 @@ protected:
     void imageSliderValueChanged(ImageSlider* slider, float value) override;
 
     void onDisplay() override;
+
+    bool onMouse(const MouseEvent& ev) override;
 
     // -------------------------------------------------------------------
     // Other Callbacks
@@ -91,6 +95,14 @@ private:
     ScopedPointer<ImageSwitch> fBtnOsc1Sync, fBtnOsc2Sync, fBtnOsc3Sync;
     ScopedPointer<ImageSwitch> fBtnGlideState;
     ScopedPointer<ImageSwitch> fBtnLFOTrigger;
+
+    // -------------------------------------------------------------------
+    // Popup Windows
+
+    ScopedPointer<TestImGuiUI> fTestPopupWindow;
+
+    ScopedPointer<ImageButton> fBtnTestPopupMenu;
+    static constexpr uint32_t BTN_TEST_POPUP_MENU_BUTTON = 256;
 
     // -------------------------------------------------------------------
     // Helpers

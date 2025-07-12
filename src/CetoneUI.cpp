@@ -106,6 +106,29 @@ CCetoneUI::CCetoneUI()
     _createSwitchButton(fBtnGlideState, pPortaMode, 764, 150);
 
     _createSwitchButton(fBtnLFOTrigger, pLfo1Trig, 677, 260);
+
+    // Test popup window
+    fTestPopupWindow = new TestImGuiUI(getTopLevelWidget());
+    fTestPopupWindow->isTestWindowOpen = true;
+
+    _createButton(fBtnTestPopupMenu, CCetoneUI::BTN_TEST_POPUP_MENU_BUTTON, fImgSwitchButton_ON, fImgSwitchButton_ON, 20, 20);
+}
+
+// Test opening popup menu on specified position
+bool CCetoneUI::onMouse(const MouseEvent& ev)
+{
+#if 0
+    if (ev.button == kMouseButtonRight && ev.press)
+    {
+        fTestPopupMenu->setPos(ev.pos);
+        fTestPopupMenu->isOpen = true;
+    }
+
+    UI::onMouse(ev);
+    return true;
+#else
+    return UI::onMouse(ev);
+#endif
 }
 
 void CCetoneUI::parameterChanged(uint32_t index, float value)
@@ -348,10 +371,14 @@ void CCetoneUI::parameterChanged(uint32_t index, float value)
 
 void CCetoneUI::imageButtonClicked(ImageButton* button, int)
 {
-#if 0
+#if 1
     switch (button->getId()) {
-    case BTN_PANIC: {
-        panic();
+    case CCetoneUI::BTN_TEST_POPUP_MENU_BUTTON: {
+        if (fTestPopupWindow)
+        {
+            fTestPopupWindow->menuPos = ImVec2(fBtnTestPopupMenu->getAbsolutePos().getX(), fBtnTestPopupMenu->getAbsolutePos().getY() + fBtnTestPopupMenu->getHeight());
+            fTestPopupWindow->requestTestMenuOpen = true;
+        }
         break;
     }
     }
