@@ -50,6 +50,15 @@ void CCetoneUI::_createButton(ScopedPointer<ImageButton>& button, uint id, Image
     button->setCallback(this);
 }
 
+void CCetoneUI::_createHiddenButton(ScopedPointer<ImageButton>& button, uint id, Size<uint> size, Point<int> absolutePos)
+{
+    button = new ImageButton(this, fImgTransparent, fImgTransparent);
+    button->setId(id);
+    button->setAbsolutePos(absolutePos);
+    button->setSize(size);
+    button->setCallback(this);
+}
+
 const char* CCetoneUI::_wave2Str(int wave)
 {
     switch (wave) {
