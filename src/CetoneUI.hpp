@@ -65,6 +65,7 @@ private:
     Image fImgBackground;
     Image fImgKnob;
     Image fImgSwitchButton_ON, fImgSwitchButton_OFF;
+    Image fImgTransparent;
 
     // -------------------------------------------------------------------
     // Widgets
@@ -111,6 +112,7 @@ private:
     void _createSlider(ScopedPointer<ImageSlider>& slider, uint32_t paramId, uint startPosX, uint startPosY, uint endPosX, uint endPosY, float step, bool inverted = false);
     void _createSwitchButton(ScopedPointer<ImageSwitch>& switchButton, uint32_t paramId, uint absolutePosX, uint absolutePosY);
     void _createButton(ScopedPointer<ImageButton>& button, uint id, Image& imageNormal, Image& imagePressed, uint absolutePosX, uint absolutePosY);
+    void _createHiddenButton(ScopedPointer<ImageButton>& button, uint id, Size<uint> size, Point<int> absolutePos);
 
     const char* _wave2Str(int wave);
     const char* _OscWave2Str(int wave);

@@ -24,6 +24,11 @@ namespace CetoneArtwork
     const unsigned int knobDataSize = 9216;
     const unsigned int knobWidth    = 48;
     const unsigned int knobHeight   = 48;
+
+    extern const char* transparentData;
+    const unsigned int transparentDataSize = 262144;
+    const unsigned int transparentWidth    = 256;
+    const unsigned int transparentHeight   = 256;
 }
 
 #endif // BINARY_CETONEARTWORK_HPP
