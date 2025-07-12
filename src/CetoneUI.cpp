@@ -112,7 +112,7 @@ CCetoneUI::CCetoneUI()
     fTestPopupWindow = new TestImGuiUI(getTopLevelWidget());
     fTestPopupWindow->isTestWindowOpen = true;
 
-    _createButton(fBtnTestPopupMenu, CCetoneUI::BTN_TEST_POPUP_MENU_BUTTON, fImgSwitchButton_ON, fImgSwitchButton_ON, 20, 20);
+    _createHiddenButton(fBtnTestPopupMenu, CCetoneUI::BTN_TEST_POPUP_MENU_BUTTON, Size<uint>(118, 25), Point<int>(0, 0));
 }
 
 // Test opening popup menu on specified position
