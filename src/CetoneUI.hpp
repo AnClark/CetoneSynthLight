@@ -4,6 +4,8 @@
 #include "ImageWidgets.hpp"
 #include "NanoVG.hpp"
 
+#include "Widgets/ImGui_UI.hpp"
+
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
 using DGL_NAMESPACE::ImageKnob;
@@ -56,6 +58,12 @@ private:
     char fLabelBuffer[32 + 1];
 
     // -------------------------------------------------------------------
+    // Dear ImGui Instance
+
+    ScopedPointer<ImGuiUI> fImGuiInstance;
+    friend class ImGuiUI;
+
+    // -------------------------------------------------------------------
     // Image resources
 
     Image fImgBackground;
@@ -94,6 +102,19 @@ private:
     ScopedPointer<ImageSwitch> fBtnLFOTrigger;
 
     // -------------------------------------------------------------------
+    // Buttons
+
+    ScopedPointer<ImageButton> fBtnAbout;
+
+    ScopedPointer<ImageButton> fBtnOsc1Waveform, fBtnOsc2Waveform, fBtnOsc3Waveform;
+    ScopedPointer<ImageButton> fBtnFilterType, fBtnFilterMode;
+    ScopedPointer<ImageButton> fBtnLfo1Waveform;
+    ScopedPointer<ImageButton> fBtnArpMode;
+
+    ScopedPointer<ImageButton> fBtnMod1Src, fBtnMod2Src, fBtnMod3Src, fBtnMod4Src;
+    ScopedPointer<ImageButton> fBtnMod1Dest, fBtnMod2Dest, fBtnMod3Dest, fBtnMod4Dest;
+
+    // -------------------------------------------------------------------
     // Helpers
 
     void _createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle = 275);
@@ -127,5 +148,6 @@ private:
 // Button IDs
 
 constexpr uint BTN_PANIC = d_cconst('p', 'n', 'i', 'c');
+constexpr uint BTN_ABOUT = d_cconst('a', 'b', 't', '.');
 
 // -----------------------------------------------------------------------

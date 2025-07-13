@@ -107,6 +107,34 @@ CCetoneUI::CCetoneUI()
     _createSwitchButton(fBtnGlideState, pPortaMode, 764, 150);
 
     _createSwitchButton(fBtnLFOTrigger, pLfo1Trig, 677, 260);
+
+    /* ImGui instance (popup menus, subwindows, etc.) */
+    fImGuiInstance = new ImGuiUI(getTopLevelWidget(), this);
+
+    /* "About" button (by clicking the plugin logo) */
+    _createHiddenButton(fBtnAbout, BTN_ABOUT, Size<uint>(118, 25), Point<int>(0, 0));
+
+    /* Popup menu button on params which has constant value sets */
+    _createHiddenButton(fBtnOsc1Waveform, pOsc1Wave, Size<uint>(45, 10 + 2), Point<int>(10 + 48 * 2, 200 + 2));
+    _createHiddenButton(fBtnOsc2Waveform, pOsc2Wave, Size<uint>(45, 10 + 2), Point<int>(262 + 48 * 2, 200 + 2));
+    _createHiddenButton(fBtnOsc3Waveform, pOsc3Wave, Size<uint>(45, 10 + 2), Point<int>(514 + 48 * 2, 200 + 2));
+
+    _createHiddenButton(fBtnFilterType, pFilterType, Size<uint>(45, 10 + 2), Point<int>(514, 96 - 4));
+    _createHiddenButton(fBtnFilterMode, pFilterMode, Size<uint>(45, 10 + 2), Point<int>(514 + 48, 96 - 4));
+
+    _createHiddenButton(fBtnLfo1Waveform, pLfo1Wave, Size<uint>(45, 10 + 2), Point<int>(534 + 48, 316 - 4));
+
+    _createHiddenButton(fBtnArpMode, pArpMode, Size<uint>(45, 10 + 2), Point<int>(767, 316 - 4 - 2));
+
+    _createHiddenButton(fBtnMod1Src, pMod1Src, Size<uint>(45, 10 + 2), Point<int>(10, 426 - 4 - 2));
+    _createHiddenButton(fBtnMod2Src, pMod2Src, Size<uint>(45, 10 + 2), Point<int>(230, 426 - 4 - 2));
+    _createHiddenButton(fBtnMod3Src, pMod3Src, Size<uint>(45, 10 + 2), Point<int>(450, 426 - 4 - 2));
+    _createHiddenButton(fBtnMod4Src, pMod4Src, Size<uint>(45, 10 + 2), Point<int>(670, 426 - 4 - 2));
+
+    _createHiddenButton(fBtnMod1Dest, pMod1Dest, Size<uint>(45, 10 + 2), Point<int>(10 + 48, 426 - 4 - 2));
+    _createHiddenButton(fBtnMod2Dest, pMod2Dest, Size<uint>(45, 10 + 2), Point<int>(230 + 48, 426 - 4 - 2));
+    _createHiddenButton(fBtnMod3Dest, pMod3Dest, Size<uint>(45, 10 + 2), Point<int>(450 + 48, 426 - 4 - 2));
+    _createHiddenButton(fBtnMod4Dest, pMod4Dest, Size<uint>(45, 10 + 2), Point<int>(670 + 48, 426 - 4 - 2));
 }
 
 void CCetoneUI::parameterChanged(uint32_t index, float value)
@@ -349,14 +377,66 @@ void CCetoneUI::parameterChanged(uint32_t index, float value)
 
 void CCetoneUI::imageButtonClicked(ImageButton* button, int)
 {
-#if 0
-    switch (button->getId()) {
-    case BTN_PANIC: {
-        panic();
-        break;
+    DISTRHO_SAFE_ASSERT_RETURN(fImGuiInstance, )
+
+    switch (button->getId())
+    {
+        case BTN_ABOUT:
+        {
+            fImGuiInstance->isAboutWindowOpen = !fImGuiInstance->isAboutWindowOpen;
+            break;
+        }
+        case pOsc1Wave:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnOsc1Waveform->getAbsolutePos().getX(), fBtnOsc1Waveform->getAbsolutePos().getY() + fBtnOsc1Waveform->getHeight());
+            fImGuiInstance->requestMenuId = pOsc1Wave;
+            break;
+        }
+        case pOsc2Wave:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnOsc2Waveform->getAbsolutePos().getX(), fBtnOsc2Waveform->getAbsolutePos().getY() + fBtnOsc2Waveform->getHeight());
+            fImGuiInstance->requestMenuId = pOsc2Wave;
+            break;
+        }
+        case pOsc3Wave:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnOsc3Waveform->getAbsolutePos().getX(), fBtnOsc3Waveform->getAbsolutePos().getY() + fBtnOsc3Waveform->getHeight());
+            fImGuiInstance->requestMenuId = pOsc3Wave;
+            break;
+        }
+        case pFilterType:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnFilterType->getAbsolutePos().getX(), fBtnFilterType->getAbsolutePos().getY() + fBtnFilterType->getHeight());
+            fImGuiInstance->requestMenuId = pFilterType;
+            break;
+        }
+        case pFilterMode:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnFilterMode->getAbsolutePos().getX(), fBtnFilterMode->getAbsolutePos().getY() + fBtnFilterMode->getHeight());
+            fImGuiInstance->requestMenuId = pFilterMode;
+            break;
+        }
+        case pLfo1Wave:
+        {
+            fImGuiInstance->menuPos = ImVec2(fBtnLfo1Waveform->getAbsolutePos().getX(), fBtnLfo1Waveform->getAbsolutePos().getY() + fBtnLfo1Waveform->getHeight());
+            fImGuiInstance->requestMenuId = pLfo1Wave;
+            break;
+        }
+        // NOTICE: For those buttons below, no need to specify menu position. Let Dear ImGui decide menu's position.
+        case pArpMode:
+        case pMod1Src:
+        case pMod2Src:
+        case pMod3Src:
+        case pMod4Src:
+        case pMod1Dest:
+        case pMod2Dest:
+        case pMod3Dest:
+        case pMod4Dest:
+        {
+            fImGuiInstance->requestMenuId = button->getId();
+            break;
+        }
     }
-    }
-#endif
 }
 
 void CCetoneUI::imageSwitchClicked(ImageSwitch* button, bool down)
@@ -445,13 +525,24 @@ void CCetoneUI::onDisplay()
     fNanoText.textBox(514, 96, 45.0f, fLabelBuffer);
 
     // Mode
-    // FIXME: Some filter types does not support setting mode.
+    // NOTE: Some filter types does not support setting mode.
     const auto _filterMode = _pf2i(fKnobFilterMode->getValue(), FMODE_MAX);
-    std::snprintf(fLabelBuffer, 32, "%s", _filterMode2str(_filterMode));
+    switch (_pf2i(fKnobFilterType->getValue(), FTYPE_MAX))
+    {
+        case FTYPE_DIRTY:
+        case FTYPE_MOOG2:
+        case FTYPE_CH12DB:
+        case FTYPE_8580:
+            std::snprintf(fLabelBuffer, 32, "%s", _filterMode2str(_filterMode));
+            break;
+        default:
+            std::snprintf(fLabelBuffer, 32, "Low");
+            break;
+    }
     fNanoText.textBox(514 + 48, 96, 45.0f, fLabelBuffer);
 
     // Cutoff
-    std::snprintf(fLabelBuffer, 32, "%.1f", fKnobCutoff->getValue() * 100.0f);
+    std::snprintf(fLabelBuffer, 32, "%.1f", fKnobCutoff->getValue() * 24000.0f);    // Cutoff frequency range: 0.0 ~ 24000.0 Hz
     fNanoText.textBox(514 + 48 * 2, 96, 45.0f, fLabelBuffer);
 
     // Resonance
@@ -571,7 +662,7 @@ void CCetoneUI::onDisplay()
 
     /* LFO */
     // Speed
-    std::snprintf(fLabelBuffer, 32, "%.2f", fLfoSpeed->getValue() * 100.0f);
+    std::snprintf(fLabelBuffer, 32, "%.2f", fLfoSpeed->getValue() * 50.0f); // Speed range: 0.0 ~ 50.0 Hz
     fNanoText.textBox(534, 316, 45.0f, fLabelBuffer);
 
     // Waveform
