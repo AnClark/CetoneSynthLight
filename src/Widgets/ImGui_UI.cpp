@@ -16,23 +16,25 @@ void ImGuiUI::onImGuiDisplay()
     //
     {
         ImGui::SetNextWindowPos(ImVec2(initialSize / 4, initialSize / 16), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(600, 230), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(600, 250), ImGuiCond_Once);
 
         if (isAboutWindowOpen)
         {
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             {
                 ImGui::SeparatorText("Cetone Synth Light");
-                ImGui::Text("Light-weight monophonic analogue-style synthesizer, by Neotec Software.\n");
+                ImGui::Text("Light-weight monophonic analogue-style synthesizer, by Neotec Software.");
+                ImGui::Text("Copyright © 2007, Neotec Software.");
+                ImGui::Text("Copyright © 2024-2025, AnClark Liu <clarklaw4701@qq.com>.");
 
                 ImGui::SeparatorText("Authors");
                 ImGui::BulletText("René 'Neotec' Jeschke - Original developer");
-                ImGui::BulletText("AnClark Liu <clarklaw4701@qq.com> - Ported to DPF, Further developments");
+                ImGui::BulletText("AnClark Liu - Ported to DPF, Further developments");
 
                 ImGui::SeparatorText("License");
                 ImGui::BulletText("This project is licensed under GNU General Public License, version 3.");
 
-                ImGui::Text("\n\n");
+                ImGui::Text("\n");
                 ImGui::Dummy(ImVec2(490, 0));
                 ImGui::SameLine();
                 if (ImGui::Button("OK", ImVec2(80, 0)))
