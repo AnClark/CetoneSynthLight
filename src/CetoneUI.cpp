@@ -531,7 +531,7 @@ void CCetoneUI::onDisplay()
     fNanoText.textBox(514 + 48, 96, 45.0f, fLabelBuffer);
 
     // Cutoff
-    std::snprintf(fLabelBuffer, 32, "%.1f", fKnobCutoff->getValue() * 100.0f);
+    std::snprintf(fLabelBuffer, 32, "%.1f", fKnobCutoff->getValue() * 24000.0f);    // Cutoff frequency range: 0.0 ~ 24000.0 Hz
     fNanoText.textBox(514 + 48 * 2, 96, 45.0f, fLabelBuffer);
 
     // Resonance
@@ -651,7 +651,7 @@ void CCetoneUI::onDisplay()
 
     /* LFO */
     // Speed
-    std::snprintf(fLabelBuffer, 32, "%.2f", fLfoSpeed->getValue() * 100.0f);
+    std::snprintf(fLabelBuffer, 32, "%.2f", fLfoSpeed->getValue() * 50.0f); // Speed range: 0.0 ~ 50.0 Hz
     fNanoText.textBox(534, 316, 45.0f, fLabelBuffer);
 
     // Waveform
