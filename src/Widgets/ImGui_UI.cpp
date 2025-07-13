@@ -169,11 +169,27 @@ void ImGuiUI::onImGuiDisplay()
 
     if (ImGui::BeginPopup("menu_filter_mode"))
     {
+        bool _isSomeModesUnsupported = false;
+
         ImGui::SeparatorText("Filter Mode");
         if (ImGui::MenuItem("Low pass")) { _triggerParamUpdate(pFilterMode, ui->_pi2f(FMODE_LOW, FMODE_MAX)); }
+        switch (ui->_pf2i(ui->fKnobFilterType->getValue(), FTYPE_MAX))
+        {
+            case FTYPE_DIRTY:
+            case FTYPE_MOOG2:
+            case FTYPE_CH12DB:
+            case FTYPE_8580:
+                break;
+            default:
+                ImGui::BeginDisabled();
+                _isSomeModesUnsupported = true;
+        }
         if (ImGui::MenuItem("Band pass")) { _triggerParamUpdate(pFilterMode, ui->_pi2f(FMODE_BAND, FMODE_MAX)); }
         if (ImGui::MenuItem("High pass")) { _triggerParamUpdate(pFilterMode, ui->_pi2f(FMODE_HIGH, FMODE_MAX)); }
         if (ImGui::MenuItem("Notch")) { _triggerParamUpdate(pFilterMode, ui->_pi2f(FMODE_NOTCH, FMODE_MAX)); }
+
+        if (_isSomeModesUnsupported)
+            ImGui::EndDisabled();
         ImGui::EndPopup();
     }
 
