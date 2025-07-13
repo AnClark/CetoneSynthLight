@@ -679,7 +679,7 @@ void CCetoneUI::onDisplay()
     fNanoText.textBox(767, 316, 45.0f, fLabelBuffer);
 
     // Speed
-    std::snprintf(fLabelBuffer, 32, "%d", (int)((1.f - fArpSpeed->getValue()) * 500.f + 0.5f));
+    std::snprintf(fLabelBuffer, 32, "%d ms", (int)((1.f - fArpSpeed->getValue()) * 500.f + 0.5f));
     fNanoText.textBox(767 + 48, 316, 45.0f, fLabelBuffer);
 
     /* Modulation Slot 1 */
