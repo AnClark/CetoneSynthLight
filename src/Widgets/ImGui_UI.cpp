@@ -243,7 +243,7 @@ void ImGuiUI::onImGuiDisplay()
 
     if (ImGui::BeginPopup("menu_mod_dest"))
     {
-        ImGui::SeparatorText("Modulator Source");
+        ImGui::SeparatorText("Modulator Destination");
         if (ImGui::MenuItem("Main Volume")) { _triggerParamUpdate(_requestedModParam, ui->_pi2f(MOD_DEST_MAINVOL, MOD_DEST_MAX)); }
         if (ImGui::MenuItem("Panning")) { _triggerParamUpdate(_requestedModParam, ui->_pi2f(MOD_DEST_PANNING, MOD_DEST_MAX)); }
         ImGui::Separator();
