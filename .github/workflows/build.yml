@@ -45,7 +45,7 @@ jobs:
           cd build
           mv bin CetoneSynthLight
           tar -c -h  -z -f ${{ github.event.repository.name }}-linux-x86_64-${{ github.event.pull_request.number || env.action_tag }}.tar.gz CetoneSynthLight/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-linux-x86_64-${{ github.event.pull_request.number || env.action_tag }}
           path: |
@@ -110,7 +110,7 @@ jobs:
           cd build
           mv bin CetoneSynthLight
           tar -c -h -z -f ${{ github.event.repository.name }}-win64-${{ github.event.pull_request.number || env.action_tag }}.tar.gz CetoneSynthLight/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-win64-${{ github.event.pull_request.number || env.action_tag }}
           path: |
@@ -159,7 +159,7 @@ jobs:
         id: slug2
         run: echo "action_tag=$(echo ${{ github.ref_name }})" >> $GITHUB_ENV
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-macOS-universal-${{ github.event.pull_request.number || env.action_tag }}
           path: |
