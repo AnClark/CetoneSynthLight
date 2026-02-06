@@ -246,10 +246,15 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 			}
 		}
 
-		// Normalize by number of voices to prevent clipping
+		// Normalize to prevent clipping when multiple voices are playing
+		// Use fixed normalization factor to avoid volume jumps when voice count changes
+		// Factor chosen to balance single-voice volume with polyphonic headroom
 		if (activeCount > 0)
 		{
-			output *= (1.0f / (float)MAX_POLYPHONY); // Constant scaling for consistent volume
+			// Divide by ~4.5 provides good balance:
+			// - Single voice has decent volume (comparable to original)
+			// - Multiple voices have headroom before clipping
+			output *= 0.22f;  // Approximately 1/4.5
 		}
 
 		// Apply global filter
