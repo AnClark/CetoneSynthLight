@@ -141,7 +141,7 @@ void CetoneSynthVoice::TriggerLfo()
 	this->Lfo->Trigger();
 }
 
-float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, float portaSpeed, int portaSamples)
+float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, float portaSpeed, int portaSamples, int arpOffset)
 {
 	if (!isActive)
 		return 0.0f;
@@ -183,10 +183,13 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 	tune[1] = voice[1].Coarse * 100 + voice[1].Fine;
 	tune[2] = voice[2].Coarse * 100 + voice[2].Fine;
 
+	// Apply arpeggiator offset to the base pitch (affects all oscillators)
+	int basePitch = currentPitch + (arpOffset * 100);
+
 	int opitch[3];
-	opitch[0] = currentPitch + tune[0];
-	opitch[1] = currentPitch + tune[1];
-	opitch[2] = currentPitch + tune[2];
+	opitch[0] = basePitch + tune[0];
+	opitch[1] = basePitch + tune[1];
+	opitch[2] = basePitch + tune[2];
 
 	// Set oscillator parameters
 	for (int i = 0; i < 3; i++)

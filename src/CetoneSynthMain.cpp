@@ -183,22 +183,58 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		// Update filters with modulated parameters
 		this->UpdateFilters(m_cutoff, m_q, m_mod);
 
+		// Process arpeggiator
+		int arpOffset = 0;  // Semitone offset from arpeggiator
+		if (this->ArpMode != -1)
+		{
+			// Check if arpeggiator position needs to wrap
+			if (this->ArpPos >= this->C64Arps[this->ArpMode][15])
+				this->ArpPos = 0;
+
+			// Get current arpeggio offset in semitones
+			arpOffset = this->C64Arps[this->ArpMode][this->ArpPos];
+
+			// Update arpeggiator counter
+			this->ArpCounter--;
+			if (this->ArpCounter <= 0)
+			{
+				this->ArpCounter = this->ArpDelay;
+				this->ArpPos++;
+			}
+		}
+
 		// Mix all active voices
 		float output = 0.f;
 		int activeCount = 0;
+
+		// Determine which note to render in arpeggiator mode
+		int arpNote = this->CurrentNote;
+		bool arpActive = (this->ArpMode != -1) && (this->CurrentNote != -1);
 
 		for (int v = 0; v < this->maxPolyphony; v++)
 		{
 			if (this->Voices[v]->IsActive())
 			{
-				float voiceOutput = this->Voices[v]->Render(
-					this->Voice,
-					this->PortaMode,
-					this->PortaSpeed,
-					(int)this->PortaSamples
-				);
-				output += voiceOutput;
-				activeCount++;
+				// In arpeggiator mode, only render the voice playing CurrentNote
+				// Other voices remain active but silent (for proper envelope behavior)
+				bool shouldRender = true;
+				if (arpActive)
+				{
+					shouldRender = (this->Voices[v]->GetNote() == arpNote);
+				}
+
+				if (shouldRender)
+				{
+					float voiceOutput = this->Voices[v]->Render(
+						this->Voice,
+						this->PortaMode,
+						this->PortaSpeed,
+						(int)this->PortaSamples,
+						arpOffset  // Pass arpeggiator offset
+					);
+					output += voiceOutput;
+					activeCount++;
+				}
 			}
 		}
 
