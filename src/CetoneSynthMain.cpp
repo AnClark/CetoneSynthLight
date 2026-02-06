@@ -242,6 +242,14 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 			}
 		}
 
+		// Apply LFO speed modulation to global LFO
+		if (voiceMod.lfoSpeed != 0.0f)
+		{
+			float modulatedSpeed = this->LfoSpeed + voiceMod.lfoSpeed;
+			modulatedSpeed = (modulatedSpeed < 0.0f) ? 0.0f : modulatedSpeed;
+			this->Lfo->SetSpeed(modulatedSpeed);
+		}
+
 		// Update filters with modulated parameters
 		this->UpdateFilters(m_cutoff, m_q, m_mod);
 
