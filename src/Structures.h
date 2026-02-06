@@ -23,6 +23,8 @@ struct SynthModulation
 struct VoiceModulation
 {
 	int				mainPitch;		// Main pitch modulation (affects all oscillators)
+	int				mainCoarse;		// Main coarse tuning (semitones)
+	int				mainFine;		// Main fine tuning (cents)
 	int				oscPitch[3];	// Per-oscillator pitch modulation
 	float			oscVol[3];		// Per-oscillator volume modulation
 	int				oscPw[3];		// Per-oscillator pulse width modulation

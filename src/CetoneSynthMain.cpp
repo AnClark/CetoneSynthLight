@@ -152,6 +152,8 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		// Initialize voice modulation structure
 		VoiceModulation voiceMod;
 		voiceMod.mainPitch = 0;
+		voiceMod.mainCoarse = this->MainCoarse;
+		voiceMod.mainFine = this->MainFine;
 		voiceMod.oscPitch[0] = voiceMod.oscPitch[1] = voiceMod.oscPitch[2] = 0;
 		voiceMod.oscVol[0] = voiceMod.oscVol[1] = voiceMod.oscVol[2] = 0.0f;
 		voiceMod.oscPw[0] = voiceMod.oscPw[1] = voiceMod.oscPw[2] = 0;

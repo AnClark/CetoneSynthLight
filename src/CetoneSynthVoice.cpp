@@ -228,6 +228,10 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 	// Apply arpeggiator offset to the base pitch (affects all oscillators)
 	int basePitch = currentPitch + (arpOffset * 100);
 	
+	// Apply global tuning (MainCoarse/MainFine from original monophonic version)
+	int mtune = voiceMod->mainCoarse * 100 + voiceMod->mainFine;
+	basePitch += mtune;
+	
 	// Apply main pitch modulation (affects all oscillators)
 	basePitch += voiceMod->mainPitch;
 
