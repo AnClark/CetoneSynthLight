@@ -132,6 +132,14 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		// Run global LFO for modulation
 		float mLfo = this->Lfo->Run();
 
+		// Initialize voice modulation structure
+		VoiceModulation voiceMod;
+		voiceMod.mainPitch = 0;
+		voiceMod.oscPitch[0] = voiceMod.oscPitch[1] = voiceMod.oscPitch[2] = 0;
+		voiceMod.oscVol[0] = voiceMod.oscVol[1] = voiceMod.oscVol[2] = 0.0f;
+		voiceMod.oscPw[0] = voiceMod.oscPw[1] = voiceMod.oscPw[2] = 0;
+		voiceMod.lfoSpeed = 0.0f;
+
 		// Process global modulations (simplified for polyphony)
 		// Note: For full per-voice modulation, these would need to be inside each voice
 		for(int i = 0; i < 4; i++)
@@ -174,6 +182,39 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 			case MOD_DEST_ENVMOD:
 				m_mod += am * 0.0001f;
 				m_mod = (m_mod < -1.f) ? -1.f : (m_mod > 1.f) ? 1.f : m_mod;
+				break;
+			case MOD_DEST_MAINPITCH:
+				voiceMod.mainPitch += (int)am;
+				break;
+			case MOD_DEST_OSC1VOL:
+				voiceMod.oscVol[0] += am * 0.0005f;
+				break;
+			case MOD_DEST_OSC2VOL:
+				voiceMod.oscVol[1] += am * 0.0005f;
+				break;
+			case MOD_DEST_OSC3VOL:
+				voiceMod.oscVol[2] += am * 0.0005f;
+				break;
+			case MOD_DEST_OSC1PITCH:
+				voiceMod.oscPitch[0] += (int)am;
+				break;
+			case MOD_DEST_OSC2PITCH:
+				voiceMod.oscPitch[1] += (int)am;
+				break;
+			case MOD_DEST_OSC3PITCH:
+				voiceMod.oscPitch[2] += (int)am;
+				break;
+			case MOD_DEST_OSC1PW:
+				voiceMod.oscPw[0] += (int)(am * 6.5536f);
+				break;
+			case MOD_DEST_OSC2PW:
+				voiceMod.oscPw[1] += (int)(am * 6.5536f);
+				break;
+			case MOD_DEST_OSC3PW:
+				voiceMod.oscPw[2] += (int)(am * 6.5536f);
+				break;
+			case MOD_DEST_LFO1SPEED:
+				voiceMod.lfoSpeed += am * 0.005f;
 				break;
 			default:
 				break;
@@ -239,6 +280,7 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 					this->PortaMode,
 					this->PortaSpeed,
 					(int)this->PortaSamples,
+					&voiceMod,
 					voiceArpOffset
 				);
 				output += voiceOutput;

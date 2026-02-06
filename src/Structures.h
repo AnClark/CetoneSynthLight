@@ -19,6 +19,16 @@ struct SynthModulation
 	float			Multiplicator;
 };
 
+// Modulation values to pass to voice rendering
+struct VoiceModulation
+{
+	int				mainPitch;		// Main pitch modulation (affects all oscillators)
+	int				oscPitch[3];	// Per-oscillator pitch modulation
+	float			oscVol[3];		// Per-oscillator volume modulation
+	int				oscPw[3];		// Per-oscillator pulse width modulation
+	float			lfoSpeed;		// LFO speed modulation
+};
+
 struct SynthProgram
 {
 	char			Name[64];

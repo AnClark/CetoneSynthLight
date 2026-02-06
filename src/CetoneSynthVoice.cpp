@@ -185,7 +185,8 @@ void CetoneSynthVoice::TriggerLfo()
 	this->Lfo->Trigger();
 }
 
-float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, float portaSpeed, int portaSamples, int arpOffset)
+float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, float portaSpeed, int portaSamples, 
+								   const VoiceModulation* voiceMod, int arpOffset)
 {
 	if (!isActive)
 		return 0.0f;
@@ -224,17 +225,23 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 
 	// Apply arpeggiator offset to the base pitch (affects all oscillators)
 	int basePitch = currentPitch + (arpOffset * 100);
+	
+	// Apply main pitch modulation (affects all oscillators)
+	basePitch += voiceMod->mainPitch;
 
 	int opitch[3];
-	opitch[0] = basePitch + tune[0];
-	opitch[1] = basePitch + tune[1];
-	opitch[2] = basePitch + tune[2];
+	opitch[0] = basePitch + tune[0] + voiceMod->oscPitch[0];
+	opitch[1] = basePitch + tune[1] + voiceMod->oscPitch[1];
+	opitch[2] = basePitch + tune[2] + voiceMod->oscPitch[2];
 
 	// Set oscillator parameters
 	for (int i = 0; i < 3; i++)
 	{
 		this->Oscs[i]->SetPitch(opitch[i]);
-		this->Oscs[i]->Set(voice[i].Pw, voice[i].Wave, voice[i].Sync);
+		// Apply pulse width modulation
+		int pw = voice[i].Pw + voiceMod->oscPw[i];
+		pw = (pw < 0) ? 0 : (pw > 65535) ? 65535 : pw;
+		this->Oscs[i]->Set(pw, voice[i].Wave, voice[i].Sync);
 	}
 
 	// Render oscillators
@@ -273,8 +280,10 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 			}
 		}
 
-		// Apply oscillator volume
-		output += oscOutput * voice[i].Volume;
+		// Apply oscillator volume with modulation
+		float vol = voice[i].Volume + voiceMod->oscVol[i];
+		vol = (vol < 0.0f) ? 0.0f : (vol > 5.0f) ? 5.0f : vol;
+		output += oscOutput * vol;
 	}
 
 	// Apply amplitude envelope

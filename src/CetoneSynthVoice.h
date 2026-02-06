@@ -26,7 +26,8 @@ public:
 	void			NoteOff();
 
 	// Audio rendering
-	float			Render(const SynthVoice voice[3], bool doPortamento, float portaSpeed, int portaSamples, int arpOffset = 0);
+	float			Render(const SynthVoice voice[3], bool doPortamento, float portaSpeed, int portaSamples, 
+						   const VoiceModulation* voiceMod, int arpOffset = 0);
 
 	// Parameter updates
 	void			UpdateEnvelopes(float attack0, float hold0, float decay0, float sustain0, float release0,
