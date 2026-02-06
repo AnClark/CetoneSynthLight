@@ -41,6 +41,10 @@ public:
 	// Reset voice to initial state
 	void			Reset();
 
+	// Arpeggiator support (for polyphonic arp mode)
+	void			InitArpeggiator(int arpDelay);
+	int				GetArpOffset(int arpMode, const int arpTable[8][16]);
+
 private:
 	// Audio components
 	CSynthOscillator*	Oscs[3];
@@ -68,4 +72,9 @@ private:
 	float				velocityMod;
 	float				velocityModStep;
 	float				velocityModEnd;
+
+	// Arpeggiator state (for polyphonic mode)
+	int					arpPos;
+	int					arpCounter;
+	int					arpDelay;
 };

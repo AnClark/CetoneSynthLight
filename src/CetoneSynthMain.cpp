@@ -183,9 +183,11 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		// Update filters with modulated parameters
 		this->UpdateFilters(m_cutoff, m_q, m_mod);
 
-		// Process arpeggiator
+		// Process arpeggiator (mono mode only - shared across all voices)
 		int arpOffset = 0;  // Semitone offset from arpeggiator
-		if (this->ArpMode != -1)
+		bool monoArpActive = (this->ArpMode != -1) && !this->ArpPoly;
+		
+		if (monoArpActive)
 		{
 			// Check if arpeggiator position needs to wrap
 			if (this->ArpPos >= this->C64Arps[this->ArpMode][15])
@@ -207,34 +209,40 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		float output = 0.f;
 		int activeCount = 0;
 
-		// Determine which note to render in arpeggiator mode
+		// Determine which note to render in mono arpeggiator mode
 		int arpNote = this->CurrentNote;
-		bool arpActive = (this->ArpMode != -1) && (this->CurrentNote != -1);
+		bool monoArpNoteCheck = monoArpActive && (this->CurrentNote != -1);
 
 		for (int v = 0; v < this->maxPolyphony; v++)
 		{
 			if (this->Voices[v]->IsActive())
 			{
-				// In arpeggiator mode, only render the voice playing CurrentNote
-				// Other voices remain active but silent (for proper envelope behavior)
-				bool shouldRender = true;
-				if (arpActive)
+				// Calculate arpeggio offset for this voice
+				int voiceArpOffset = 0;
+				
+				if (this->ArpPoly && this->ArpMode != -1)
 				{
-					shouldRender = (this->Voices[v]->GetNote() == arpNote);
+					// Polyphonic arpeggiator: each voice calculates its own offset
+					voiceArpOffset = this->Voices[v]->GetArpOffset(this->ArpMode, this->C64Arps);
+				}
+				else if (monoArpActive)
+				{
+					// Monophonic arpeggiator: only CurrentNote voice gets the offset
+					if (this->Voices[v]->GetNote() == arpNote)
+						voiceArpOffset = arpOffset;
+					else
+						continue;  // Skip other voices in mono arp mode
 				}
 
-				if (shouldRender)
-				{
-					float voiceOutput = this->Voices[v]->Render(
-						this->Voice,
-						this->PortaMode,
-						this->PortaSpeed,
-						(int)this->PortaSamples,
-						arpOffset  // Pass arpeggiator offset
-					);
-					output += voiceOutput;
-					activeCount++;
-				}
+				float voiceOutput = this->Voices[v]->Render(
+					this->Voice,
+					this->PortaMode,
+					this->PortaSpeed,
+					(int)this->PortaSamples,
+					voiceArpOffset
+				);
+				output += voiceOutput;
+				activeCount++;
 			}
 		}
 
@@ -432,6 +440,12 @@ void CCetoneSynth::NoteOn(int note, int vel)
 	);
 	this->Voices[voiceIndex]->SetLfoParams(this->LfoSpeed, this->LfoPw, this->LfoWave, this->LfoTrigger);
 	this->Voices[voiceIndex]->TriggerLfo();
+
+	// Initialize arpeggiator for this voice (polyphonic mode)
+	if (this->ArpPoly && this->ArpMode != -1)
+	{
+		this->Voices[voiceIndex]->InitArpeggiator(this->ArpDelay);
+	}
 
 	// Increment age for all other active voices (for voice stealing)
 	for (int i = 0; i < this->maxPolyphony; i++)

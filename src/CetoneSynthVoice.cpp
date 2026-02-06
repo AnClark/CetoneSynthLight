@@ -57,6 +57,11 @@ void CetoneSynthVoice::Reset()
 	velocityModStep = 0.0f;
 	velocityModEnd = 0.0f;
 
+	// Reset arpeggiator state
+	arpPos = 0;
+	arpCounter = 0;
+	arpDelay = 0;
+
 	for (int i = 0; i < 3; i++)
 		this->Oscs[i]->Reset();
 
@@ -122,6 +127,36 @@ void CetoneSynthVoice::NoteOff()
 	// Release envelopes
 	this->Envs[0]->Gate(false);
 	this->Envs[1]->Gate(false);
+}
+
+void CetoneSynthVoice::InitArpeggiator(int delay)
+{
+	arpPos = 0;
+	arpCounter = delay;
+	arpDelay = delay;
+}
+
+int CetoneSynthVoice::GetArpOffset(int arpMode, const int arpTable[8][16])
+{
+	if (arpMode == -1 || !isActive)
+		return 0;
+
+	// Check if arpeggiator position needs to wrap
+	if (arpPos >= arpTable[arpMode][15])
+		arpPos = 0;
+
+	// Get current arpeggio offset in semitones
+	int offset = arpTable[arpMode][arpPos];
+
+	// Update arpeggiator counter
+	arpCounter--;
+	if (arpCounter <= 0)
+	{
+		arpCounter = arpDelay;
+		arpPos++;
+	}
+
+	return offset;
 }
 
 void CetoneSynthVoice::UpdateEnvelopes(float attack0, float hold0, float decay0, float sustain0, float release0,

@@ -228,6 +228,7 @@ private:
 
 	int					ArpMode;
 	int					ArpSpeed;
+	bool				ArpPoly;		// Polyphonic arpeggiator mode
 
 	bool				PortaMode;
 	float				PortaSpeed;

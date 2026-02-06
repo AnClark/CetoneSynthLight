@@ -42,6 +42,7 @@ struct SynthProgram
 
 	int				ArpMode;
 	int				ArpSpeed;
+	bool			ArpPoly;		// Polyphonic arpeggiator (each voice has independent arp)
 
 	// Portamento
 
@@ -91,8 +92,9 @@ enum PARAMETERS
 
 	pArpMode,		// 10
 	pArpSpeed,
+	pArpPoly,		// Polyphonic arpeggiator mode (0=mono, 1=poly)
 
-	pOsc1Coarse,	// 12
+	pOsc1Coarse,	// 13
 	pOsc1Fine,
 	pOsc1Wave,
 	pOsc1Pw,

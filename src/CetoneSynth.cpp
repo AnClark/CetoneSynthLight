@@ -151,6 +151,7 @@ void CCetoneSynth::InitSynthParameters()
 
 	this->ArpMode			=	-1;
 	this->ArpSpeed			=	20;
+	this->ArpPoly			=	false;
 
 	this->PortaMode			=	false;
 	this->PortaSpeed		=	0.1f;
@@ -415,6 +416,7 @@ void CCetoneSynth::ReadProgram(int prg)
 
 	this->ArpMode		=	p->ArpMode;
 	this->ArpSpeed		=	p->ArpSpeed;
+	this->ArpPoly		=	p->ArpPoly;
 
 	this->SetArpSpeed(this->ArpSpeed);
 
@@ -481,7 +483,8 @@ void CCetoneSynth::WriteProgram(int prg)
 
 	p->ArpMode		=	this->ArpMode;
 	p->ArpSpeed		=	this->ArpSpeed;
-	
+	p->ArpPoly		=	this->ArpPoly;
+
 	p->PortaMode	=	this->PortaMode;
 	p->PortaSpeed	=	this->PortaSpeed;
 

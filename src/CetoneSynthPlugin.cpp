@@ -210,6 +210,7 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 
 	case pArpMode:		arp2str(p->ArpMode, text); break;
 	case pArpSpeed:		int2string(p->ArpSpeed, text, kVstMaxParamStrLen); break;
+	case pArpPoly:		bool2string(p->ArpPoly, text); break;
 
 	case pOsc1Coarse:	int2string(p->Voice[0].Coarse, text, kVstMaxParamStrLen); break;
 	case pOsc2Coarse:	int2string(p->Voice[1].Coarse, text, kVstMaxParamStrLen); break;
@@ -310,6 +311,7 @@ void CCetoneSynth::getParameterName(VstInt32 index, char* text)
 
 	case pArpMode:		vst_strncpy(text, "A.Mode", kVstMaxParamStrLen);	break;
 	case pArpSpeed:		vst_strncpy(text, "A.Speed", kVstMaxParamStrLen);	break;
+	case pArpPoly:		vst_strncpy(text, "A.Poly", kVstMaxParamStrLen);	break;
 
 	case pOsc1Coarse:	vst_strncpy(text, "Coarse 1", kVstMaxParamStrLen);	break;
 	case pOsc2Coarse:	vst_strncpy(text, "Coarse 2", kVstMaxParamStrLen);	break;
@@ -412,6 +414,7 @@ void CCetoneSynth::setParameter(VstInt32 index, float value)
 
 	case pArpMode:		this->ArpMode = p->ArpMode = pf2i(value, ARP_MAX + 1) - 1; break;
 	case pArpSpeed:		this->ArpSpeed = p->ArpSpeed = (int)((1.f - value) * 500.f + 0.5f); this->SetArpSpeed(this->ArpSpeed); break;
+	case pArpPoly:		this->ArpPoly = p->ArpPoly = c_val2bool(value); break;
 
 	case pOsc1Coarse:	this->Voice[0].Coarse = p->Voice[0].Coarse = c_val2coarse(value); break;
 	case pOsc2Coarse:	this->Voice[1].Coarse = p->Voice[1].Coarse = c_val2coarse(value); break;
@@ -518,6 +521,7 @@ float CCetoneSynth::getParameter(VstInt32 index) const
 
 	case pArpMode:		ret = pi2f(p->ArpMode + 1, ARP_MAX + 1); break;
 	case pArpSpeed:		ret = 1.f - (p->ArpSpeed / 500.f); break;
+	case pArpPoly:		ret = c_bool2val(p->ArpPoly); break;
 
 	case pOsc1Coarse:	ret = c_coarse2val(p->Voice[0].Coarse); break;
 	case pOsc2Coarse:	ret = c_coarse2val(p->Voice[1].Coarse); break;
