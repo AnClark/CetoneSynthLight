@@ -267,6 +267,65 @@ void ImGuiUI::onImGuiDisplay()
 
         ImGui::EndPopup();
     }
+
+    //
+    // Toolbar area - resides below the plugin logo
+    //
+    if (ImGui::Begin("Main Toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBackground))
+    {
+        ImGui::SetWindowPos(ImVec2(0, 60));
+        ImGui::SetWindowSize(ImVec2(100, 80));
+
+        // Polyphony switch
+        {
+            ImGui::Text("Polyphony");
+
+            String _buttonLabel = String(ui->fMaxPolyphony) + "##PolyphonyButton";
+            if (ImGui::Button(_buttonLabel.buffer(), ImVec2(60, 0)))
+            {
+                ImGui::OpenPopup("Polyphony Config");
+            }
+        }
+
+        // Polyphony configuration popup
+        if (ImGui::BeginPopup("Polyphony Config"))
+        {
+            ImGui::SeparatorText("Polyphony Configuration");
+            {
+                ImGui::Text("Max polyphony:");
+                ImGui::Dummy(ImVec2(0, 2));
+
+                if (ImGui::SliderInt("##PolyphonySlider", reinterpret_cast<int*>(&ui->fMaxPolyphony), 1, 16, ui->fMaxPolyphony <= 1 ? "Monopoly" : "%d"))
+                {
+                    _triggerParamUpdate(pMaxPolyphony, static_cast<float>(ui->fMaxPolyphony));
+                }
+            }
+            ImGui::Dummy(ImVec2(0, 2));
+            {
+                if (ImGui::Button("OK", ImVec2(70, 0)))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::SameLine(0, 18);
+
+                if (ImGui::Button("Set to Monopoly", ImVec2(120, 0)))
+                {
+                    _triggerParamUpdate(pMaxPolyphony, 1);
+                }
+            }
+            ImGui::Dummy(ImVec2(0, 5));
+            ImGui::Separator();
+            if (ImGui::Checkbox("Arpeggio in polyphony", &ui->fArpPoly))
+            {
+                _triggerParamUpdate(pArpPoly, ui->fArpPoly ? 1.0f : 0.0f);
+            }
+
+            ImGui::EndPopup();
+        }
+
+        ImGui::End();
+    }
 }
 
 void ImGuiUI::_triggerParamUpdate(uint32_t paramId, float newValue)

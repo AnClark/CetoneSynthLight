@@ -115,6 +115,12 @@ private:
     ScopedPointer<ImageButton> fBtnMod1Dest, fBtnMod2Dest, fBtnMod3Dest, fBtnMod4Dest;
 
     // -------------------------------------------------------------------
+    // Special parameters' storage (not controlled by knobs and switches)
+
+    uint32_t fMaxPolyphony;
+    bool fArpPoly;
+
+    // -------------------------------------------------------------------
     // Helpers
 
     void _createKnob(ScopedPointer<ImageKnob>& knob, uint32_t paramId, uint absolutePosX, uint absolutePosY, float defaultValue, uint rotationAngle = 275);
