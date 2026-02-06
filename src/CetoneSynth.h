@@ -311,6 +311,7 @@ private:
 
 	void				NoteOn(int note, int vel);
 	void				NoteOff(int note, int vel);
+	void				Panic();		// MIDI panic - stop all voices
 
 	// Polyphony management
 	int					AllocateVoice(int note);

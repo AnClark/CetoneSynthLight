@@ -350,8 +350,9 @@ void CCetoneSynth::HandleMidi(int p0, int p1, int p2)
 		case 83:		// Mod 4 Amount
 			this->setParameterAutomated(pMod4Amount, (float)p2 / 127.f);
 			break;
-		case 123:
-			this->CurrentNote	= -1;
+		case 120:		// All Sounds Off (MIDI panic)
+		case 123:		// All Notes Off (MIDI panic)
+			this->Panic();
 			break;
 		}
 		break;
@@ -429,6 +430,26 @@ void CCetoneSynth::NoteOff(int note, int vel)
 			}
 		}
 	}
+}
+
+void CCetoneSynth::Panic()
+{
+	// MIDI panic - immediately stop all voices
+	for (int i = 0; i < this->maxPolyphony; i++)
+	{
+		// Use Reset() instead of NoteOff() to immediately silence the voice
+		// This is the correct behavior for ALL_SOUNDS_OFF and ALL_NOTES_OFF
+		this->Voices[i]->Reset();
+	}
+
+	// Reset current note tracking and voice management state
+	this->CurrentNote = -1;
+	this->activeVoiceCount = 0;
+	
+	// Reset portamento state
+	this->DoPorta = false;
+	this->CurrentPitch = 0;
+	this->PortaPitch = 0;
 }
 
 void CCetoneSynth::UpdateFilters()
