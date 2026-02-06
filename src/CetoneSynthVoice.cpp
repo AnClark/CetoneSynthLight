@@ -57,6 +57,8 @@ void CetoneSynthVoice::Reset()
 	velocityModStep = 0.0f;
 	velocityModEnd = 0.0f;
 
+	modEnvValue = 0.0f;
+
 	// Reset arpeggiator state
 	arpPos = 0;
 	arpCounter = 0;
@@ -285,6 +287,9 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 		vol = (vol < 0.0f) ? 0.0f : (vol > 5.0f) ? 5.0f : vol;
 		output += oscOutput * vol;
 	}
+
+	// Run and store modulation envelope (for modulation matrix)
+	modEnvValue = this->Envs[1]->Run();
 
 	// Apply amplitude envelope
 	float ampEnv = this->Envs[0]->Run();

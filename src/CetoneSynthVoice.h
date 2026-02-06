@@ -20,6 +20,7 @@ public:
 	int				GetNote() const { return noteNumber; }
 	int				GetAge() const { return voiceAge; }
 	float			GetEnvelopeLevel() const;
+	float			GetModEnvelope() const { return modEnvValue; }	// Get modulation envelope value
 
 	// Note events
 	void			NoteOn(int note, int velocity, bool portamento, int fromPitch, int portaSamples);
@@ -73,6 +74,9 @@ private:
 	float				velocityMod;
 	float				velocityModStep;
 	float				velocityModEnd;
+
+	// Modulation envelope value (updated each sample)
+	float				modEnvValue;
 
 	// Arpeggiator state (for polyphonic mode)
 	int					arpPos;

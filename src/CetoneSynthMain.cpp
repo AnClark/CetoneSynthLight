@@ -132,6 +132,23 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		// Run global LFO for modulation
 		float mLfo = this->Lfo->Run();
 
+		// Get modulation envelope from current note's voice
+		// In monophonic original, there was one envelope; in polyphonic, use CurrentNote's voice
+		float mEnv = 0.0f;
+		if (this->CurrentNote != -1)
+		{
+			// Find voice playing current note
+			for (int v = 0; v < this->maxPolyphony; v++)
+			{
+				if (this->Voices[v]->IsActive() && this->Voices[v]->GetNote() == this->CurrentNote)
+				{
+					mEnv = this->Voices[v]->GetModEnvelope();
+					break;
+				}
+			}
+		}
+		float mMix = mEnv * mLfo;
+
 		// Initialize voice modulation structure
 		VoiceModulation voiceMod;
 		voiceMod.mainPitch = 0;
@@ -154,7 +171,9 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 			{
 			case MOD_SRC_VEL:			am = this->VelocityMod;		break;
 			case MOD_SRC_CTRL1:			am = this->Ctrl1Mod;		break;
+			case MOD_SRC_MENV1:			am = mEnv;					break;
 			case MOD_SRC_LFO1:			am = mLfo;					break;
+			case MOD_SRC_MENV1xLFO1:	am = mMix;					break;
 			default:					am = 0.f;					break;
 			}
 
