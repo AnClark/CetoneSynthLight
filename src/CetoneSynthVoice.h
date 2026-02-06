@@ -22,7 +22,7 @@ public:
 	float			GetEnvelopeLevel() const;
 
 	// Note events
-	void			NoteOn(int note, int velocity, bool portamento, int fromPitch);
+	void			NoteOn(int note, int velocity, bool portamento, int fromPitch, int portaSamples);
 	void			NoteOff();
 
 	// Audio rendering

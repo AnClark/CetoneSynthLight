@@ -82,7 +82,7 @@ float CetoneSynthVoice::GetEnvelopeLevel() const
 	return isReleasing ? 0.1f : 1.0f;
 }
 
-void CetoneSynthVoice::NoteOn(int note, int vel, bool portamento, int fromPitch)
+void CetoneSynthVoice::NoteOn(int note, int vel, bool portamento, int fromPitch, int portaSamples)
 {
 	noteNumber = note;
 	velocity = vel;
@@ -98,18 +98,27 @@ void CetoneSynthVoice::NoteOn(int note, int vel, bool portamento, int fromPitch)
 
 	if (portamento && fromPitch != 0)
 	{
-		// Portamento will be handled in Render()
+		// Calculate portamento step ONCE in NoteOn (like original monophonic version)
 		doPorta = true;
 		currentPitch = fromPitch;
 		portaPitch = targetPitch;
 		portaFrac = currentPitch << 14;
-		// portaStep will be calculated in Render() based on portaSamples
+		// Calculate fixed portaStep based on distance and time
+		if (portaSamples > 0)
+		{
+			portaStep = (int)(((targetPitch - fromPitch) / (float)portaSamples) * 16384.0f + 0.5f);
+		}
+		else
+		{
+			portaStep = 0;
+		}
 	}
 	else
 	{
 		doPorta = false;
 		currentPitch = targetPitch;
 		portaPitch = targetPitch;
+		portaStep = 0;
 	}
 
 	// Trigger envelopes
@@ -181,14 +190,9 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 	if (!isActive)
 		return 0.0f;
 
-	// Handle portamento
+	// Handle portamento (using fixed portaStep calculated in NoteOn)
 	if (doPorta && doPortamento)
 	{
-		if (portaSamples > 0)
-		{
-			portaStep = (int)(((portaPitch - currentPitch) / (float)portaSamples) * 16384.0f + 0.5f);
-		}
-
 		portaFrac += portaStep;
 		int tmp = portaFrac >> 14;
 

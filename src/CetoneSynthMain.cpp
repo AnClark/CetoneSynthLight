@@ -445,7 +445,7 @@ void CCetoneSynth::NoteOn(int note, int vel)
 		this->VelocityModStep = 0.f;
 
 	// Trigger the voice
-	this->Voices[voiceIndex]->NoteOn(note, vel, usePorta, fromPitch);
+	this->Voices[voiceIndex]->NoteOn(note, vel, usePorta, fromPitch, (int)this->PortaSamples);
 	this->Voices[voiceIndex]->UpdateEnvelopes(
 		this->EnvAttack[0], this->EnvHold[0], this->EnvDecay[0], this->EnvSustain[0], this->EnvRelease[0],
 		this->EnvAttack[1], this->EnvHold[1], this->EnvDecay[1], this->EnvSustain[1], this->EnvRelease[1]
