@@ -240,6 +240,12 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 		o_val[i] = this->Oscs[i]->Run();
 	}
 
+	// Process oscillator sync (must be called after Run())
+	// Order matters: OSC2 syncs OSC1, OSC3 syncs OSC2, OSC1 syncs OSC3
+	this->Oscs[1]->ProcessSync();
+	this->Oscs[2]->ProcessSync();
+	this->Oscs[0]->ProcessSync();
+
 	// Mix oscillators with ring modulation
 	float output = 0.0f;
 	for (int i = 0; i < 3; i++)
