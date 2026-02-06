@@ -84,6 +84,7 @@ CCetoneSynth::CCetoneSynth()
 		this->Voices[i] = new CetoneSynthVoice();
 
 	this->activeVoiceCount = 0;
+	this->maxPolyphony = MAX_POLYPHONY;	// Default to maximum
 
 	// Global LFO (can be used for modulation)
 	this->Lfo = new CSynthLfo();
@@ -195,6 +196,8 @@ void CCetoneSynth::InitSynthParameters()
 
 	this->LfoSpeed		=	0.05f;
 	this->LfoWave		=	WAVE_SINE;
+
+	this->maxPolyphony	=	MAX_POLYPHONY;
 	this->LfoPw			=	32768;
 	this->LfoTrigger	=	false;
 

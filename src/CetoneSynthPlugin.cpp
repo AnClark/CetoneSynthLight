@@ -283,6 +283,8 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 	case pMod4Mul:		int2string((int)p->Modulations[3].Multiplicator, text, kVstMaxParamStrLen); break;
 
 	case pFilterMod:	myfloat2string(p->EnvMod, text); break;
+
+	case pMaxPolyphony:	int2string(this->maxPolyphony, text, kVstMaxParamStrLen); break;
 	}
 }
 
@@ -381,6 +383,8 @@ void CCetoneSynth::getParameterName(VstInt32 index, char* text)
 	case pMod4Mul:		vst_strncpy(text, "M4 Mul.", kVstMaxParamStrLen);	break;
 
 	case pFilterMod:	vst_strncpy(text, "F.Param.", kVstMaxParamStrLen);	break;
+
+	case pMaxPolyphony:	vst_strncpy(text, "Max Poly", kVstMaxParamStrLen);	break;
 	}
 }
 
@@ -479,6 +483,13 @@ void CCetoneSynth::setParameter(VstInt32 index, float value)
 	case pMod4Mul:		this->Modulations[3].Multiplicator = p->Modulations[3].Multiplicator = floorf(value * 100.f + 0.5f); break;
 
 	case pFilterMod:	this->EnvMod = p->EnvMod = (value - 0.5f) * 2.f; break;
+
+	case pMaxPolyphony:
+		// Direct integer value (1-16), no mapping needed
+		this->maxPolyphony = (int)(value + 0.5f); // Round to nearest integer
+		if (this->maxPolyphony < 1) this->maxPolyphony = 1;
+		if (this->maxPolyphony > MAX_POLYPHONY) this->maxPolyphony = MAX_POLYPHONY;
+		break;
 	}
 }
 
@@ -577,6 +588,8 @@ float CCetoneSynth::getParameter(VstInt32 index) const
 	case pMod3Mul:		ret = p->Modulations[2].Multiplicator / 100.f; break;
 	case pMod4Mul:		ret = p->Modulations[3].Multiplicator / 100.f; break;
 	case pFilterMod:	ret = (p->EnvMod + 1.f) / 2.f; break;
+
+	case pMaxPolyphony:	ret = (float)this->maxPolyphony; break; // Direct integer value
 	}
 
 	return ret;

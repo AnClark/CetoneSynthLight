@@ -155,5 +155,7 @@ enum PARAMETERS
 
 	pFilterMod,
 
+	pMaxPolyphony,	// Maximum number of polyphonic voices (1-16)
+
 	pParameters
 };

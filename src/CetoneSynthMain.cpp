@@ -187,7 +187,7 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		float output = 0.f;
 		int activeCount = 0;
 
-		for (int v = 0; v < MAX_POLYPHONY; v++)
+		for (int v = 0; v < this->maxPolyphony; v++)
 		{
 			if (this->Voices[v]->IsActive())
 			{
@@ -397,7 +397,7 @@ void CCetoneSynth::NoteOn(int note, int vel)
 	this->Voices[voiceIndex]->TriggerLfo();
 
 	// Increment age for all other active voices (for voice stealing)
-	for (int i = 0; i < MAX_POLYPHONY; i++)
+	for (int i = 0; i < this->maxPolyphony; i++)
 	{
 		if (i != voiceIndex)
 			this->Voices[i]->IncrementAge();
@@ -407,7 +407,7 @@ void CCetoneSynth::NoteOn(int note, int vel)
 void CCetoneSynth::NoteOff(int note, int vel)
 {
 	// Find all voices playing this note and release them
-	for (int i = 0; i < MAX_POLYPHONY; i++)
+	for (int i = 0; i < this->maxPolyphony; i++)
 	{
 		if (this->Voices[i]->IsActive() && this->Voices[i]->GetNote() == note)
 		{
@@ -420,7 +420,7 @@ void CCetoneSynth::NoteOff(int note, int vel)
 	{
 		// Find another active note to be the "current" note
 		this->CurrentNote = -1;
-		for (int i = 0; i < MAX_POLYPHONY; i++)
+		for (int i = 0; i < this->maxPolyphony; i++)
 		{
 			if (this->Voices[i]->IsActive() && !this->Voices[i]->IsReleasing())
 			{

@@ -6,8 +6,8 @@
 // Returns the voice index, or -1 if failed
 int CCetoneSynth::AllocateVoice(int note)
 {
-	// First, try to find an inactive voice
-	for (int i = 0; i < MAX_POLYPHONY; i++)
+	// First, try to find an inactive voice (within maxPolyphony limit)
+	for (int i = 0; i < this->maxPolyphony; i++)
 	{
 		if (!this->Voices[i]->IsActive())
 		{
@@ -24,7 +24,7 @@ int CCetoneSynth::AllocateVoice(int note)
 	int oldestActiveVoice = -1;
 	int oldestActiveAge = -1;
 
-	for (int i = 0; i < MAX_POLYPHONY; i++)
+	for (int i = 0; i < this->maxPolyphony; i++)
 	{
 		if (this->Voices[i]->IsReleasing())
 		{
