@@ -238,20 +238,33 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 	for (int i = 0; i < 3; i++)
 	{
 		o_val[i] = this->Oscs[i]->Run();
-
-		// Ring modulation
-		if (voice[i].Ring)
-		{
-			int nextIdx = (i + 1) % 3;
-			o_val[i] *= o_val[nextIdx];
-		}
 	}
 
-	// Mix oscillators
+	// Mix oscillators with ring modulation
 	float output = 0.0f;
 	for (int i = 0; i < 3; i++)
 	{
-		output += o_val[i] * voice[i].Volume;
+		float oscOutput = o_val[i];
+
+		// Ring modulation - multiply with next oscillator
+		if (voice[i].Ring)
+		{
+			switch (i)
+			{
+			case 0:
+				oscOutput *= o_val[1];  // OSC1 ring with OSC2
+				break;
+			case 1:
+				oscOutput *= o_val[2];  // OSC2 ring with OSC3
+				break;
+			case 2:
+				oscOutput *= o_val[0];  // OSC3 ring with OSC1
+				break;
+			}
+		}
+
+		// Apply oscillator volume
+		output += oscOutput * voice[i].Volume;
 	}
 
 	// Apply amplitude envelope
