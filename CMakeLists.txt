@@ -37,6 +37,8 @@ dpf_add_plugin (${PROJECT_NAME}
         src/CetoneSynthDPF.cpp
         src/CetoneSynthMain.cpp
         src/CetoneSynthPlugin.cpp
+        src/CetoneSynthVoice.cpp
+        src/CetoneSynthPolyphony.cpp
         ${SRC_BACKEND}
     FILES_UI
         src/CetoneUI.cpp

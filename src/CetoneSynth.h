@@ -22,6 +22,11 @@
 
 #include "VST2.4_Compatibility.hpp"
 
+#define MAX_POLYPHONY 16
+
+// Forward declaration
+class CetoneSynthVoice;
+
 class CCetoneSynth : public DISTRHO::Plugin
 {
 public:
@@ -184,9 +189,15 @@ private:
 
 	// Classes
 
-	CSynthOscillator*	Oscs[3];
-	CSynthEnvelope*		Envs[2];
+	// Polyphonic voices
+	CetoneSynthVoice*	Voices[MAX_POLYPHONY];
+	int					activeVoiceCount;
+
+	// Legacy single-voice components (kept for modulation/global LFO)
 	CSynthLfo*			Lfo;
+
+	// Helper envelope for TimeValue calculation (UI display)
+	CSynthEnvelope*		HelperEnv;
 
 	CMidiStack*			MidiStack;
 	CFilterDirty*		FilterDirty;
@@ -299,6 +310,11 @@ private:
 
 	void				NoteOn(int note, int vel);
 	void				NoteOff(int note, int vel);
+
+	// Polyphony management
+	int					AllocateVoice(int note);
+	int					FindVoiceByNote(int note);
+	void				UpdateAllVoices();
 
 	void				UpdateFilters();
 	void				UpdateFilters(float cutoff, float q, float mode);

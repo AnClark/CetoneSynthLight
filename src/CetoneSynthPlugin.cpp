@@ -239,20 +239,20 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 	case pOsc2Ring:		bool2string(p->Voice[1].Ring, text); break;
 	case pOsc3Ring:		bool2string(p->Voice[2].Ring, text); break;
 
-	case pEnv1A:		myfloat2string(this->Envs[0]->TimeValue(p->Attack[0]), text); break;
-	case pEnv2A:		myfloat2string(this->Envs[0]->TimeValue(p->Attack[1]), text); break;
+	case pEnv1A:		myfloat2string(this->HelperEnv->TimeValue(p->Attack[0]), text); break;
+	case pEnv2A:		myfloat2string(this->HelperEnv->TimeValue(p->Attack[1]), text); break;
 
-	case pEnv1H:		myfloat2string(this->Envs[0]->TimeValue(p->Hold[0]), text); break;
-	case pEnv2H:		myfloat2string(this->Envs[0]->TimeValue(p->Hold[1]), text); break;
+	case pEnv1H:		myfloat2string(this->HelperEnv->TimeValue(p->Hold[0]), text); break;
+	case pEnv2H:		myfloat2string(this->HelperEnv->TimeValue(p->Hold[1]), text); break;
 
-	case pEnv1D:		myfloat2string(this->Envs[0]->TimeValue(p->Decay[0]), text); break;
-	case pEnv2D:		myfloat2string(this->Envs[0]->TimeValue(p->Decay[1]), text); break;
+	case pEnv1D:		myfloat2string(this->HelperEnv->TimeValue(p->Decay[0]), text); break;
+	case pEnv2D:		myfloat2string(this->HelperEnv->TimeValue(p->Decay[1]), text); break;
 
 	case pEnv1S:		myfloat2string(p->Sustain[0], text); break;
 	case pEnv2S:		myfloat2string(p->Sustain[1], text); break;
 
-	case pEnv1R:		myfloat2string(this->Envs[0]->TimeValue(p->Release[0]), text); break;
-	case pEnv2R:		myfloat2string(this->Envs[0]->TimeValue(p->Release[1]), text); break;
+	case pEnv1R:		myfloat2string(this->HelperEnv->TimeValue(p->Release[0]), text); break;
+	case pEnv2R:		myfloat2string(this->HelperEnv->TimeValue(p->Release[1]), text); break;
 
 	case pLfo1Speed:	myfloat2string(p->LfoSpeed, text); break;
 

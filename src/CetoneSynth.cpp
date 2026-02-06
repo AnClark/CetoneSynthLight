@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "CetoneSynth.h"
+#include "CetoneSynthVoice.h"
 //#include "cetoneeditor.h"
 
 #if NOTE_RANGE == 1
@@ -78,20 +79,18 @@ CCetoneSynth::CCetoneSynth()
 	this->VelocityModStep = 0.f;
 	this->Ctrl1ModStep = 0.f;
 
-	for(int i = 0; i < 3; i++)
-		this->Oscs[i] = new CSynthOscillator();
+	// Initialize polyphonic voices
+	for (int i = 0; i < MAX_POLYPHONY; i++)
+		this->Voices[i] = new CetoneSynthVoice();
 
-	this->Oscs[1]->SetSyncDest(this->Oscs[0]);
-	this->Oscs[2]->SetSyncDest(this->Oscs[1]);
-	this->Oscs[0]->SetSyncDest(this->Oscs[2]);
+	this->activeVoiceCount = 0;
 
-	for(int i = 0; i < 2; i++)
-		this->Envs[i] = new CSynthEnvelope();
-
-	this->Envs[0]->SetPreAttack(0.02f);
-	this->Envs[1]->SetPreAttack(0.002f);
-
+	// Global LFO (can be used for modulation)
 	this->Lfo = new CSynthLfo();
+
+	// Helper envelope for TimeValue calculations (UI)
+	this->HelperEnv = new CSynthEnvelope();
+	this->HelperEnv->SetPreAttack(0.02f);
 
 	this->MidiStack		= new CMidiStack();
 
@@ -116,13 +115,11 @@ CCetoneSynth::CCetoneSynth()
 
 CCetoneSynth::~CCetoneSynth()
 {
-	for(int i = 0; i < 3; i++)
-		delete this->Oscs[i];
-
-	for(int i = 0; i < 2; i++)
-		delete this->Envs[i];
+	for (int i = 0; i < MAX_POLYPHONY; i++)
+		delete this->Voices[i];
 
 	delete this->Lfo;
+	delete this->HelperEnv;
 
 	delete this->MidiStack;
 
