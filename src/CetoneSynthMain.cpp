@@ -418,15 +418,22 @@ void CCetoneSynth::NoteOn(int note, int vel)
 	if (voiceIndex < 0)
 		return; // Failed to allocate (shouldn't happen)
 
+	// Calculate target pitch for new note
+	int targetPitch = (note + NOTE_OFFSET) * 100;
+	
 	// Determine if we should use portamento
-	// For polyphonic mode, portamento only applies if there's a previous note
+	// Original behavior: portamento if there was a previous note (CurrentNote != -1)
+	// regardless of whether that note is still playing
 	bool usePorta = (this->PortaMode && (this->PortaSpeed != 0.f) && (this->CurrentNote != -1));
-	int fromPitch = usePorta ? this->CurrentPitch : 0;
+	int fromPitch = usePorta ? this->CurrentPitch : targetPitch;
 
 	// Update current note tracking (for portamento reference)
 	this->CurrentNote = note;
 	this->CurrentVelocity = vel;
-	this->CurrentPitch = (note + NOTE_OFFSET) * 100;
+	
+	// Always update CurrentPitch to target (for next note's portamento reference)
+	// The voice will handle sliding from fromPitch to CurrentPitch if portamento is active
+	this->CurrentPitch = targetPitch;
 
 	// Update velocity modulation (global)
 	this->VelocityModEnd = (float)vel / 127.f;
@@ -470,21 +477,10 @@ void CCetoneSynth::NoteOff(int note, int vel)
 			this->Voices[i]->NoteOff();
 		}
 	}
-
-	// Update current note if it matches (for UI/portamento reference)
-	if (this->CurrentNote == note)
-	{
-		// Find another active note to be the "current" note
-		this->CurrentNote = -1;
-		for (int i = 0; i < this->maxPolyphony; i++)
-		{
-			if (this->Voices[i]->IsActive() && !this->Voices[i]->IsReleasing())
-			{
-				this->CurrentNote = this->Voices[i]->GetNote();
-				break;
-			}
-		}
-	}
+	
+	// Do NOT clear CurrentNote - it should be preserved for portamento
+	// Original monophonic behavior: NoteOff only releases envelopes,
+	// CurrentNote stays for next note's portamento reference
 }
 
 void CCetoneSynth::Panic()
