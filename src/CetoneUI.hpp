@@ -117,8 +117,10 @@ private:
     // -------------------------------------------------------------------
     // Special parameters' storage (not controlled by knobs and switches)
 
+#ifdef ENABLE_POLYPHONY
     uint32_t fMaxPolyphony;
     bool fArpPoly;
+#endif
 
     // -------------------------------------------------------------------
     // Helpers

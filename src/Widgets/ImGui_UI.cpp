@@ -276,6 +276,7 @@ void ImGuiUI::onImGuiDisplay()
         ImGui::SetWindowPos(ImVec2(0, 60));
         ImGui::SetWindowSize(ImVec2(100, 80));
 
+#ifdef ENABLE_POLYPHONY
         // Polyphony switch
         {
             ImGui::Text("Polyphony");
@@ -323,6 +324,7 @@ void ImGuiUI::onImGuiDisplay()
 
             ImGui::EndPopup();
         }
+#endif
 
         ImGui::End();
     }

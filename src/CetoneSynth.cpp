@@ -2,7 +2,9 @@
 #include <math.h>
 
 #include "CetoneSynth.h"
+#ifdef ENABLE_POLYPHONY
 #include "CetoneSynthVoice.h"
+#endif
 //#include "cetoneeditor.h"
 
 #if NOTE_RANGE == 1
@@ -15,6 +17,12 @@
 	#pragma message("CetoneSynth: Using analogue behaviour")
 #else
 	#pragma message("CetoneSynth: Using digital behaviour")
+#endif
+
+#ifdef ENABLE_POLYPHONY
+	#pragma message("CetoneSynth: Polyphony mode")
+#else
+	#pragma message("CetoneSynth: Monophonic mode")
 #endif
 
 bool TablesBuilt = false;
@@ -79,19 +87,36 @@ CCetoneSynth::CCetoneSynth()
 	this->VelocityModStep = 0.f;
 	this->Ctrl1ModStep = 0.f;
 
+#ifdef ENABLE_POLYPHONY
 	// Initialize polyphonic voices
 	for (int i = 0; i < MAX_POLYPHONY; i++)
 		this->Voices[i] = new CetoneSynthVoice();
 
 	this->activeVoiceCount = 0;
 	this->maxPolyphony = MAX_POLYPHONY;	// Default to maximum
+#else
+	for(int i = 0; i < 3; i++)
+		this->Oscs[i] = new CSynthOscillator();
+
+	this->Oscs[1]->SetSyncDest(this->Oscs[0]);
+	this->Oscs[2]->SetSyncDest(this->Oscs[1]);
+	this->Oscs[0]->SetSyncDest(this->Oscs[2]);
+
+	for(int i = 0; i < 2; i++)
+		this->Envs[i] = new CSynthEnvelope();
+
+	this->Envs[0]->SetPreAttack(0.02f);
+	this->Envs[1]->SetPreAttack(0.002f);
+#endif
 
 	// Global LFO (can be used for modulation)
 	this->Lfo = new CSynthLfo();
 
+#ifdef ENABLE_POLYPHONY
 	// Helper envelope for TimeValue calculations (UI)
 	this->HelperEnv = new CSynthEnvelope();
 	this->HelperEnv->SetPreAttack(0.02f);
+#endif
 
 	this->MidiStack		= new CMidiStack();
 
@@ -116,11 +141,21 @@ CCetoneSynth::CCetoneSynth()
 
 CCetoneSynth::~CCetoneSynth()
 {
+#ifdef ENABLE_POLYPHONY
 	for (int i = 0; i < MAX_POLYPHONY; i++)
 		delete this->Voices[i];
+#else
+	for(int i = 0; i < 3; i++)
+		delete this->Oscs[i];
+
+	for(int i = 0; i < 2; i++)
+		delete this->Envs[i];
+#endif
 
 	delete this->Lfo;
+#ifdef ENABLE_POLYPHONY
 	delete this->HelperEnv;
+#endif
 
 	delete this->MidiStack;
 
@@ -151,7 +186,9 @@ void CCetoneSynth::InitSynthParameters()
 
 	this->ArpMode			=	-1;
 	this->ArpSpeed			=	20;
+#ifdef ENABLE_POLYPHONY
 	this->ArpPoly			=	false;
+#endif
 
 	this->PortaMode			=	false;
 	this->PortaSpeed		=	0.1f;
@@ -198,7 +235,9 @@ void CCetoneSynth::InitSynthParameters()
 	this->LfoSpeed		=	0.05f;
 	this->LfoWave		=	WAVE_SINE;
 
+#ifdef ENABLE_POLYPHONY
 	this->maxPolyphony	=	MAX_POLYPHONY;
+#endif
 	this->LfoPw			=	32768;
 	this->LfoTrigger	=	false;
 
@@ -416,7 +455,9 @@ void CCetoneSynth::ReadProgram(int prg)
 
 	this->ArpMode		=	p->ArpMode;
 	this->ArpSpeed		=	p->ArpSpeed;
+#ifdef ENABLE_POLYPHONY
 	this->ArpPoly		=	p->ArpPoly;
+#endif
 
 	this->SetArpSpeed(this->ArpSpeed);
 
@@ -483,7 +524,9 @@ void CCetoneSynth::WriteProgram(int prg)
 
 	p->ArpMode		=	this->ArpMode;
 	p->ArpSpeed		=	this->ArpSpeed;
+#ifdef ENABLE_POLYPHONY
 	p->ArpPoly		=	this->ArpPoly;
+#endif
 
 	p->PortaMode	=	this->PortaMode;
 	p->PortaSpeed	=	this->PortaSpeed;
