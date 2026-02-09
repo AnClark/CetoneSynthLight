@@ -340,10 +340,10 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		// Factor chosen to balance single-voice volume with polyphonic headroom
 		if (activeCount > 0)
 		{
-			// Divide by ~4.5 provides good balance:
+			// Divide by ~4.0 provides good balance:
 			// - Single voice has decent volume (comparable to original)
 			// - Multiple voices have headroom before clipping
-			output *= 0.22f;  // Approximately 1/4.5
+			output *= 0.25f;  // Approximately 1/4
 		}
 
 		// Apply global filter
