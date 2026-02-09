@@ -6,6 +6,12 @@
 
 #include "CetoneUI.hpp" // For class CCetoneUI
 
+#ifdef ENABLE_POLYPHONY
+static const char* SYNTH_TYPE_STRING = "polyphonic";
+#else
+static const char* SYNTH_TYPE_STRING = "monophonic";
+#endif
+
 void ImGuiUI::onImGuiDisplay()
 {
     double scaleFactor = getScaleFactor() * userScaling;
@@ -16,16 +22,16 @@ void ImGuiUI::onImGuiDisplay()
     //
     {
         ImGui::SetNextWindowPos(ImVec2(initialSize / 4, initialSize / 16), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(600, 250), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(600, 250 + 15), ImGuiCond_Once);
 
         if (isAboutWindowOpen)
         {
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             {
                 ImGui::SeparatorText("Cetone Synth Light");
-                ImGui::Text("Light-weight monophonic analogue-style synthesizer, by Neotec Software.");
+                ImGui::Text("Light-weight %s analogue-style synthesizer, by Neotec Software.", SYNTH_TYPE_STRING);
                 ImGui::Text("Copyright © 2007, Neotec Software.");
-                ImGui::Text("Copyright © 2024-2025, AnClark Liu <clarklaw4701@qq.com>.");
+                ImGui::Text("Copyright © 2024-2026, AnClark Liu <clarklaw4701@qq.com>.");
 
                 ImGui::SeparatorText("Authors");
                 ImGui::BulletText("René 'Neotec' Jeschke - Original developer");
@@ -33,6 +39,7 @@ void ImGuiUI::onImGuiDisplay()
 
                 ImGui::SeparatorText("License");
                 ImGui::BulletText("This project is licensed under GNU General Public License, version 3.");
+                ImGui::BulletText("VST is a trademark of Steinberg");
 
                 ImGui::Text("\n");
                 ImGui::Dummy(ImVec2(490, 0));
