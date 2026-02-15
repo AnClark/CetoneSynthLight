@@ -2,6 +2,13 @@
 #include "SynthOscillator.h"
 #include "SynthEnvelope.h"
 #include "SynthLfo.h"
+#include "FilterDirty.h"
+#include "FilterMoog.h"
+#include "FilterMoog2.h"
+#include "FilterCh12db.h"
+#include "Filter303.h"
+#include "Filter8580.h"
+#include "FilterBiquad.h"
 #include "Defines.h"
 #include "GlobalFunctions.h"
 #include <cmath>
@@ -22,6 +29,18 @@ CetoneSynthVoice::CetoneSynthVoice()
 	this->Envs[1]->SetPreAttack(0.002f);
 
 	this->Lfo = new CSynthLfo();
+	
+	// Create per-voice filters
+	this->FilterDirty = new CFilterDirty();
+	this->FilterCh12db = new CFilterCh12db();
+	this->FilterMoog = new CFilterMoog();
+	this->FilterMoog2 = new CFilterMoog2();
+	this->Filter303 = new CFilter303();
+	this->Filter8580 = new CFilter8580();
+	this->FilterBiquad = new CFilterBiquad();
+	
+	this->filterType = FTYPE_NONE;
+	this->filterMode = 0;
 
 	Reset();
 }
@@ -35,6 +54,15 @@ CetoneSynthVoice::~CetoneSynthVoice()
 		delete this->Envs[i];
 
 	delete this->Lfo;
+	
+	// Delete per-voice filters
+	delete this->FilterDirty;
+	delete this->FilterCh12db;
+	delete this->FilterMoog;
+	delete this->FilterMoog2;
+	delete this->Filter303;
+	delete this->Filter8580;
+	delete this->FilterBiquad;
 }
 
 void CetoneSynthVoice::Reset()
@@ -71,6 +99,15 @@ void CetoneSynthVoice::Reset()
 		this->Envs[i]->Reset();
 
 	this->Lfo->Reset();
+	
+	// Reset per-voice filters
+	this->FilterDirty->Reset();
+	this->FilterCh12db->Reset();
+	this->FilterMoog->Reset();
+	this->FilterMoog2->Reset();
+	this->Filter303->Reset();
+	this->Filter8580->Reset();
+	this->FilterBiquad->Reset();
 }
 
 float CetoneSynthVoice::GetEnvelopeLevel() const
@@ -289,13 +326,63 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 		// Apply oscillator volume with modulation
 		float vol = voice[i].Volume + voiceMod->oscVol[i];
 		vol = (vol < 0.0f) ? 0.0f : (vol > 5.0f) ? 5.0f : vol;
-		output += oscOutput * vol;
+		oscOutput *= vol;
+
+		// Hard clipping for individual oscillator (like original monophonic version)
+		constexpr float clipThreshold = 1.0f;
+		if (oscOutput > clipThreshold)
+			oscOutput = clipThreshold;
+		else if (oscOutput < -clipThreshold)
+			oscOutput = -clipThreshold;
+
+		output += oscOutput;
 	}
+
+	// CRITICAL: Normalize oscillator mix before filter (like original monophonic version)
+	// 3 oscillators mixed → divide by 3 to maintain proper signal level
+	output *= 0.333333f;
 
 	// Run and store modulation envelope (for modulation matrix)
 	modEnvValue = this->Envs[1]->Run();
 
-	// Apply amplitude envelope
+	// Apply per-voice filter BEFORE envelope (correct signal chain: osc→filter→env)
+	// This prevents envelope-induced signal variations from destabilizing high-Q filters
+	switch (this->filterType)
+	{
+	default:
+	case FTYPE_NONE:
+		break;
+	case FTYPE_DIRTY:
+		output = this->FilterDirty->Run(output);
+		if (!std::isfinite(output)) { this->FilterDirty->Reset(); output = 0.f; }
+		break;
+	case FTYPE_MOOG:
+		output = this->FilterMoog->Run(output);
+		if (!std::isfinite(output)) { this->FilterMoog->Reset(); output = 0.f; }
+		break;
+	case FTYPE_MOOG2:
+		output = this->FilterMoog2->Run(output);
+		if (!std::isfinite(output)) { this->FilterMoog2->Reset(); output = 0.f; }
+		break;
+	case FTYPE_CH12DB:
+		output = this->FilterCh12db->Run(output);
+		if (!std::isfinite(output)) { this->FilterCh12db->Reset(); output = 0.f; }
+		break;
+	case FTYPE_303:
+		output = this->Filter303->Run(output);
+		if (!std::isfinite(output)) { this->Filter303->Reset(); output = 0.f; }
+		break;
+	case FTYPE_8580:
+		output = this->Filter8580->Run(output);
+		if (!std::isfinite(output)) { this->Filter8580->Reset(); output = 0.f; }
+		break;
+	case FTYPE_BUDDA:
+		output = this->FilterBiquad->Run(output);
+		if (!std::isfinite(output)) { this->FilterBiquad->Reset(); output = 0.f; }
+		break;
+	}
+
+	// Apply amplitude envelope AFTER filter
 	float ampEnv = this->Envs[0]->Run();
 	output *= ampEnv;
 
@@ -307,4 +394,54 @@ float CetoneSynthVoice::Render(const SynthVoice voice[3], bool doPortamento, flo
 	}
 
 	return output;
+}
+
+void CetoneSynthVoice::UpdateFilter(float cutoff, float q, float mod)
+{
+	// Update filter parameters (called from main synth when parameters change)
+	switch (this->filterType)
+	{
+	default:
+		break;
+	case FTYPE_DIRTY:
+		this->FilterDirty->Set(cutoff, q);
+		break;
+	case FTYPE_CH12DB:
+		this->FilterCh12db->Set(cutoff, q);
+		break;
+	case FTYPE_MOOG:
+		this->FilterMoog->Set(cutoff, q);
+		break;
+	case FTYPE_MOOG2:
+		this->FilterMoog2->Set(cutoff, q);
+		break;
+	case FTYPE_303:
+		this->Filter303->Set(cutoff, q, mod);
+		break;
+	case FTYPE_8580:
+		this->Filter8580->Set(cutoff, q);
+		break;
+	case FTYPE_BUDDA:
+		this->FilterBiquad->Set(cutoff, q);
+		break;
+	}
+}
+
+void CetoneSynthVoice::SetFilterType(int type)
+{
+	this->filterType = type;
+}
+
+void CetoneSynthVoice::SetFilterMode(int mode)
+{
+	this->filterMode = mode;
+	
+	// Apply mode to all filters (though only active type matters)
+	this->FilterDirty->SetMode(mode);
+	this->FilterCh12db->SetMode(mode);
+	this->FilterMoog->SetMode(mode);
+	this->FilterMoog2->SetMode(mode);
+	this->Filter303->SetMode(mode);
+	this->Filter8580->SetMode(mode);
+	// Biquad filter doesn't have mode
 }
