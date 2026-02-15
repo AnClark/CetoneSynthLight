@@ -210,6 +210,9 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 
 	case pArpMode:		arp2str(p->ArpMode, text); break;
 	case pArpSpeed:		int2string(p->ArpSpeed, text, kVstMaxParamStrLen); break;
+#ifdef ENABLE_POLYPHONY
+	case pArpPoly:		bool2string(p->ArpPoly, text); break;
+#endif
 
 	case pOsc1Coarse:	int2string(p->Voice[0].Coarse, text, kVstMaxParamStrLen); break;
 	case pOsc2Coarse:	int2string(p->Voice[1].Coarse, text, kVstMaxParamStrLen); break;
@@ -239,6 +242,16 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 	case pOsc2Ring:		bool2string(p->Voice[1].Ring, text); break;
 	case pOsc3Ring:		bool2string(p->Voice[2].Ring, text); break;
 
+#ifdef ENABLE_POLYPHONY
+	case pEnv1A:		myfloat2string(this->HelperEnv->TimeValue(p->Attack[0]), text); break;
+	case pEnv2A:		myfloat2string(this->HelperEnv->TimeValue(p->Attack[1]), text); break;
+
+	case pEnv1H:		myfloat2string(this->HelperEnv->TimeValue(p->Hold[0]), text); break;
+	case pEnv2H:		myfloat2string(this->HelperEnv->TimeValue(p->Hold[1]), text); break;
+
+	case pEnv1D:		myfloat2string(this->HelperEnv->TimeValue(p->Decay[0]), text); break;
+	case pEnv2D:		myfloat2string(this->HelperEnv->TimeValue(p->Decay[1]), text); break;
+#else
 	case pEnv1A:		myfloat2string(this->Envs[0]->TimeValue(p->Attack[0]), text); break;
 	case pEnv2A:		myfloat2string(this->Envs[0]->TimeValue(p->Attack[1]), text); break;
 
@@ -247,12 +260,18 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 
 	case pEnv1D:		myfloat2string(this->Envs[0]->TimeValue(p->Decay[0]), text); break;
 	case pEnv2D:		myfloat2string(this->Envs[0]->TimeValue(p->Decay[1]), text); break;
+#endif
 
 	case pEnv1S:		myfloat2string(p->Sustain[0], text); break;
 	case pEnv2S:		myfloat2string(p->Sustain[1], text); break;
 
+#ifdef ENABLE_POLYPHONY
+	case pEnv1R:		myfloat2string(this->HelperEnv->TimeValue(p->Release[0]), text); break;
+	case pEnv2R:		myfloat2string(this->HelperEnv->TimeValue(p->Release[1]), text); break;
+#else
 	case pEnv1R:		myfloat2string(this->Envs[0]->TimeValue(p->Release[0]), text); break;
 	case pEnv2R:		myfloat2string(this->Envs[0]->TimeValue(p->Release[1]), text); break;
+#endif
 
 	case pLfo1Speed:	myfloat2string(p->LfoSpeed, text); break;
 
@@ -283,6 +302,10 @@ void CCetoneSynth::getParameterDisplay(VstInt32 index, char* text)
 	case pMod4Mul:		int2string((int)p->Modulations[3].Multiplicator, text, kVstMaxParamStrLen); break;
 
 	case pFilterMod:	myfloat2string(p->EnvMod, text); break;
+
+#ifdef ENABLE_POLYPHONY
+	case pMaxPolyphony:	int2string(this->maxPolyphony, text, kVstMaxParamStrLen); break;
+#endif
 	}
 }
 
@@ -308,6 +331,9 @@ void CCetoneSynth::getParameterName(VstInt32 index, char* text)
 
 	case pArpMode:		vst_strncpy(text, "A.Mode", kVstMaxParamStrLen);	break;
 	case pArpSpeed:		vst_strncpy(text, "A.Speed", kVstMaxParamStrLen);	break;
+#ifdef ENABLE_POLYPHONY
+	case pArpPoly:		vst_strncpy(text, "A.Poly", kVstMaxParamStrLen);	break;
+#endif
 
 	case pOsc1Coarse:	vst_strncpy(text, "Coarse 1", kVstMaxParamStrLen);	break;
 	case pOsc2Coarse:	vst_strncpy(text, "Coarse 2", kVstMaxParamStrLen);	break;
@@ -381,6 +407,10 @@ void CCetoneSynth::getParameterName(VstInt32 index, char* text)
 	case pMod4Mul:		vst_strncpy(text, "M4 Mul.", kVstMaxParamStrLen);	break;
 
 	case pFilterMod:	vst_strncpy(text, "F.Param.", kVstMaxParamStrLen);	break;
+
+#ifdef ENABLE_POLYPHONY
+	case pMaxPolyphony:	vst_strncpy(text, "Max Poly", kVstMaxParamStrLen);	break;
+#endif
 	}
 }
 
@@ -408,6 +438,9 @@ void CCetoneSynth::setParameter(VstInt32 index, float value)
 
 	case pArpMode:		this->ArpMode = p->ArpMode = pf2i(value, ARP_MAX + 1) - 1; break;
 	case pArpSpeed:		this->ArpSpeed = p->ArpSpeed = (int)((1.f - value) * 500.f + 0.5f); this->SetArpSpeed(this->ArpSpeed); break;
+#ifdef ENABLE_POLYPHONY
+	case pArpPoly:		this->ArpPoly = p->ArpPoly = c_val2bool(value); break;
+#endif
 
 	case pOsc1Coarse:	this->Voice[0].Coarse = p->Voice[0].Coarse = c_val2coarse(value); break;
 	case pOsc2Coarse:	this->Voice[1].Coarse = p->Voice[1].Coarse = c_val2coarse(value); break;
@@ -479,6 +512,15 @@ void CCetoneSynth::setParameter(VstInt32 index, float value)
 	case pMod4Mul:		this->Modulations[3].Multiplicator = p->Modulations[3].Multiplicator = floorf(value * 100.f + 0.5f); break;
 
 	case pFilterMod:	this->EnvMod = p->EnvMod = (value - 0.5f) * 2.f; break;
+
+#ifdef ENABLE_POLYPHONY
+	case pMaxPolyphony:
+		// Direct integer value (1-16), no mapping needed
+		this->maxPolyphony = (int)(value + 0.5f); // Round to nearest integer
+		if (this->maxPolyphony < 1) this->maxPolyphony = 1;
+		if (this->maxPolyphony > MAX_POLYPHONY) this->maxPolyphony = MAX_POLYPHONY;
+		break;
+#endif
 	}
 }
 
@@ -507,6 +549,9 @@ float CCetoneSynth::getParameter(VstInt32 index) const
 
 	case pArpMode:		ret = pi2f(p->ArpMode + 1, ARP_MAX + 1); break;
 	case pArpSpeed:		ret = 1.f - (p->ArpSpeed / 500.f); break;
+#ifdef ENABLE_POLYPHONY
+	case pArpPoly:		ret = c_bool2val(p->ArpPoly); break;
+#endif
 
 	case pOsc1Coarse:	ret = c_coarse2val(p->Voice[0].Coarse); break;
 	case pOsc2Coarse:	ret = c_coarse2val(p->Voice[1].Coarse); break;
@@ -577,6 +622,10 @@ float CCetoneSynth::getParameter(VstInt32 index) const
 	case pMod3Mul:		ret = p->Modulations[2].Multiplicator / 100.f; break;
 	case pMod4Mul:		ret = p->Modulations[3].Multiplicator / 100.f; break;
 	case pFilterMod:	ret = (p->EnvMod + 1.f) / 2.f; break;
+
+#ifdef ENABLE_POLYPHONY
+	case pMaxPolyphony:	ret = (float)this->maxPolyphony; break; // Direct integer value
+#endif
 	}
 
 	return ret;

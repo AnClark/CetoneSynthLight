@@ -22,6 +22,13 @@
 
 #include "VST2.4_Compatibility.hpp"
 
+#ifdef ENABLE_POLYPHONY
+#define MAX_POLYPHONY 16
+
+// Forward declaration
+class CetoneSynthVoice;
+#endif
+
 class CCetoneSynth : public DISTRHO::Plugin
 {
 public:
@@ -184,9 +191,23 @@ private:
 
 	// Classes
 
+#ifdef ENABLE_POLYPHONY
+	// Polyphonic voices
+	CetoneSynthVoice*	Voices[MAX_POLYPHONY];
+	int					activeVoiceCount;
+	int					maxPolyphony;		// Current max polyphony setting (1-16)
+
+	// Legacy single-voice components (kept for modulation/global LFO)
+	CSynthLfo*			Lfo;
+
+	// Helper envelope for TimeValue calculation (UI display)
+	CSynthEnvelope*		HelperEnv;
+#else
 	CSynthOscillator*	Oscs[3];
 	CSynthEnvelope*		Envs[2];
+
 	CSynthLfo*			Lfo;
+#endif
 
 	CMidiStack*			MidiStack;
 	CFilterDirty*		FilterDirty;
@@ -216,6 +237,9 @@ private:
 
 	int					ArpMode;
 	int					ArpSpeed;
+#ifdef ENABLE_POLYPHONY
+	bool				ArpPoly;		// Polyphonic arpeggiator mode
+#endif
 
 	bool				PortaMode;
 	float				PortaSpeed;
@@ -299,6 +323,16 @@ private:
 
 	void				NoteOn(int note, int vel);
 	void				NoteOff(int note, int vel);
+#ifdef ENABLE_POLYPHONY	// NOTE: Monopoly mode usually won't need to use Panic.
+	void				Panic();		// MIDI panic - stop all voices
+#endif
+
+#ifdef ENABLE_POLYPHONY
+	// Polyphony management
+	int					AllocateVoice(int note);
+	int					FindVoiceByNote(int note);
+	void				UpdateAllVoices();
+#endif
 
 	void				UpdateFilters();
 	void				UpdateFilters(float cutoff, float q, float mode);

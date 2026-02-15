@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CetoneSynth.h"
-
 class CSynthOscillator
 {
 public:

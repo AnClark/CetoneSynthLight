@@ -6,6 +6,12 @@
 
 #include "CetoneUI.hpp" // For class CCetoneUI
 
+#ifdef ENABLE_POLYPHONY
+static const char* SYNTH_TYPE_STRING = "polyphonic";
+#else
+static const char* SYNTH_TYPE_STRING = "monophonic";
+#endif
+
 void ImGuiUI::onImGuiDisplay()
 {
     double scaleFactor = getScaleFactor() * userScaling;
@@ -16,16 +22,16 @@ void ImGuiUI::onImGuiDisplay()
     //
     {
         ImGui::SetNextWindowPos(ImVec2(initialSize / 4, initialSize / 16), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(600, 250), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(600, 250 + 15), ImGuiCond_Once);
 
         if (isAboutWindowOpen)
         {
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             {
                 ImGui::SeparatorText("Cetone Synth Light");
-                ImGui::Text("Light-weight monophonic analogue-style synthesizer, by Neotec Software.");
+                ImGui::Text("Light-weight %s analogue-style synthesizer, by Neotec Software.", SYNTH_TYPE_STRING);
                 ImGui::Text("Copyright © 2007, Neotec Software.");
-                ImGui::Text("Copyright © 2024-2025, AnClark Liu <clarklaw4701@qq.com>.");
+                ImGui::Text("Copyright © 2024-2026, AnClark Liu <clarklaw4701@qq.com>.");
 
                 ImGui::SeparatorText("Authors");
                 ImGui::BulletText("René 'Neotec' Jeschke - Original developer");
@@ -33,6 +39,7 @@ void ImGuiUI::onImGuiDisplay()
 
                 ImGui::SeparatorText("License");
                 ImGui::BulletText("This project is licensed under GNU General Public License, version 3.");
+                ImGui::BulletText("VST is a trademark of Steinberg");
 
                 ImGui::Text("\n");
                 ImGui::Dummy(ImVec2(490, 0));
@@ -266,6 +273,67 @@ void ImGuiUI::onImGuiDisplay()
         if (ImGui::MenuItem("Filter Parameter (Env. Mod)")) { _triggerParamUpdate(_requestedModParam, ui->_pi2f(MOD_DEST_ENVMOD, MOD_DEST_MAX)); }
 
         ImGui::EndPopup();
+    }
+
+    //
+    // Toolbar area - resides below the plugin logo
+    //
+    if (ImGui::Begin("Main Toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBackground))
+    {
+        ImGui::SetWindowPos(ImVec2(0, 60));
+        ImGui::SetWindowSize(ImVec2(100, 80));
+
+#ifdef ENABLE_POLYPHONY
+        // Polyphony switch
+        {
+            ImGui::Text("Polyphony");
+
+            String _buttonLabel = String(ui->fMaxPolyphony) + "##PolyphonyButton";
+            if (ImGui::Button(_buttonLabel.buffer(), ImVec2(60, 0)))
+            {
+                ImGui::OpenPopup("Polyphony Config");
+            }
+        }
+
+        // Polyphony configuration popup
+        if (ImGui::BeginPopup("Polyphony Config"))
+        {
+            ImGui::SeparatorText("Polyphony Configuration");
+            {
+                ImGui::Text("Max polyphony:");
+                ImGui::Dummy(ImVec2(0, 2));
+
+                if (ImGui::SliderInt("##PolyphonySlider", reinterpret_cast<int*>(&ui->fMaxPolyphony), 1, 16, ui->fMaxPolyphony <= 1 ? "Monopoly" : "%d"))
+                {
+                    _triggerParamUpdate(pMaxPolyphony, static_cast<float>(ui->fMaxPolyphony));
+                }
+            }
+            ImGui::Dummy(ImVec2(0, 2));
+            {
+                if (ImGui::Button("OK", ImVec2(70, 0)))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::SameLine(0, 18);
+
+                if (ImGui::Button("Set to Monopoly", ImVec2(120, 0)))
+                {
+                    _triggerParamUpdate(pMaxPolyphony, 1);
+                }
+            }
+            ImGui::Dummy(ImVec2(0, 5));
+            ImGui::Separator();
+            if (ImGui::Checkbox("Arpeggio in polyphony", &ui->fArpPoly))
+            {
+                _triggerParamUpdate(pArpPoly, ui->fArpPoly ? 1.0f : 0.0f);
+            }
+
+            ImGui::EndPopup();
+        }
+#endif
+
+        ImGui::End();
     }
 }
 

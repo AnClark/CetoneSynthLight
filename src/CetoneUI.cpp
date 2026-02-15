@@ -14,6 +14,10 @@ CCetoneUI::CCetoneUI()
     , fImgSwitchButton_ON(Art::buttons_onData, Art::buttons_onWidth, Art::buttons_onHeight, kImageFormatBGR)
     , fImgSwitchButton_OFF(Art::buttons_offData, Art::buttons_offWidth, Art::buttons_offHeight, kImageFormatBGR)
     , fImgTransparent(Art::transparentData, Art::transparentWidth, Art::transparentHeight, kImageFormatBGRA)
+#ifdef ENABLE_POLYPHONY
+    , fMaxPolyphony(1)
+    , fArpPoly(false)
+#endif
 {
     /* Initialize NanoVG font and text buffer */
     NanoVG::FontId font = fNanoText.createFontFromMemory("Source Sans Regular", Fonts::SourceSans3_RegularData, Fonts::SourceSans3_RegularDataSize, false);
@@ -362,6 +366,16 @@ void CCetoneUI::parameterChanged(uint32_t index, float value)
         case pMod4Mul:
             fMod4Multiply->setValue(value);
             break;
+
+        // Special parameters
+#ifdef ENABLE_POLYPHONY
+        case pMaxPolyphony:
+            fMaxPolyphony = static_cast<uint32_t>(value);
+            break;
+        case pArpPoly:
+            fArpPoly = (value == 1.0f ? true : false);
+            break;
+#endif
 
         default:
             d_stderr2("WARNING: unrecognized parameter %d", index);

@@ -4,10 +4,27 @@ void CCetoneSynth::initParameter(uint32_t index, Parameter& parameter)
 {
     parameter.hints |= kParameterIsAutomatable;
 
+#ifdef ENABLE_POLYPHONY
+    // Special handling for pMaxPolyphony parameter (need correct range before getParameter call)
+    if (index == pMaxPolyphony) {
+        parameter.hints |= kParameterIsInteger;
+        parameter.ranges.min = 1.0f;
+        parameter.ranges.max = 16.0f;
+        parameter.ranges.def = 16.0f;
+        parameter.unit = "voices";
+    } else {
+        // For Cetone normal parameters, fallback to classic VST 2.4 param range (0.0 ~ 1.0), to fit with Cetone's own param handlers.
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 1.0f;
+        parameter.ranges.def = getParameter(index);
+    }
+#else
+    // For all Cetone parameters:
     // Fallback to classic VST 2.4 param range (0.0 ~ 1.0), to fit with Cetone's own param handlers.
     parameter.ranges.min = 0.0f;
     parameter.ranges.max = 1.0f;
     parameter.ranges.def = getParameter(index);
+#endif
 
     // Must set parameter.symbol, this is the unique ID of each parameter.
     // If not set, you can neither save presets nor reset to factory default, in VST3 and CLAP!
@@ -28,6 +45,10 @@ void CCetoneSynth::initParameter(uint32_t index, Parameter& parameter)
     case pOsc3Ring:
 
     case pLfo1Trig:
+
+#ifdef ENABLE_POLYPHONY
+    case pArpPoly:
+#endif
         parameter.hints |= kParameterIsBoolean;
         break;
     }
