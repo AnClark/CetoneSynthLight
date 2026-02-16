@@ -1054,15 +1054,10 @@ void CCetoneSynth::SetFilterMode(int mode)
 	{
 		this->Voices[v]->SetFilterMode(mode);
 	}
-	// Store mode based on filter type capabilities
-	switch (this->FilterType)
+	// Get actual mode from first voice (filters may clamp to supported modes)
+	if (this->maxPolyphony > 0)
 	{
-	default:
-		mode = 0;
-		break;
-	case FTYPE_BUDDA:
-		mode = FMODE_LOW;
-		break;
+		mode = this->Voices[0]->GetFilterMode();
 	}
 #else
 	// In monophonic mode, update global filter

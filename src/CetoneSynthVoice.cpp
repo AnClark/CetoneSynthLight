@@ -434,14 +434,44 @@ void CetoneSynthVoice::SetFilterType(int type)
 
 void CetoneSynthVoice::SetFilterMode(int mode)
 {
-	this->filterMode = mode;
-	
-	// Apply mode to all filters (though only active type matters)
-	this->FilterDirty->SetMode(mode);
-	this->FilterCh12db->SetMode(mode);
-	this->FilterMoog->SetMode(mode);
-	this->FilterMoog2->SetMode(mode);
-	this->Filter303->SetMode(mode);
-	this->Filter8580->SetMode(mode);
-	// Biquad filter doesn't have mode
+	// Apply mode to active filter and get actual mode used
+	// (filters may not support all modes and will clamp to valid range)
+	switch (this->filterType)
+	{
+	default:
+		this->filterMode = 0;
+		break;
+	case FTYPE_DIRTY:
+		this->FilterDirty->SetMode(mode);
+		this->filterMode = this->FilterDirty->GetMode();
+		break;
+	case FTYPE_CH12DB:
+		this->FilterCh12db->SetMode(mode);
+		this->filterMode = this->FilterCh12db->GetMode();
+		break;
+	case FTYPE_MOOG:
+		this->FilterMoog->SetMode(mode);
+		this->filterMode = this->FilterMoog->GetMode();
+		break;
+	case FTYPE_MOOG2:
+		this->FilterMoog2->SetMode(mode);
+		this->filterMode = this->FilterMoog2->GetMode();
+		break;
+	case FTYPE_303:
+		this->Filter303->SetMode(mode);
+		this->filterMode = this->Filter303->GetMode();
+		break;
+	case FTYPE_8580:
+		this->Filter8580->SetMode(mode);
+		this->filterMode = this->Filter8580->GetMode();
+		break;
+	case FTYPE_BUDDA:
+		this->filterMode = FMODE_LOW;
+		break;
+	}
+}
+
+int CetoneSynthVoice::GetFilterMode() const
+{
+	return this->filterMode;
 }

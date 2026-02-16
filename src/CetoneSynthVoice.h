@@ -58,6 +58,7 @@ public:
 	void			UpdateFilter(float cutoff, float q, float mod);
 	void			SetFilterType(int type);
 	void			SetFilterMode(int mode);
+	int				GetFilterMode() const;
 
 private:
 	// Audio components
