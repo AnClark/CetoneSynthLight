@@ -6,6 +6,13 @@
 class CSynthOscillator;
 class CSynthEnvelope;
 class CSynthLfo;
+class CFilterDirty;
+class CFilterMoog;
+class CFilterMoog2;
+class CFilterCh12db;
+class CFilter303;
+class CFilter8580;
+class CFilterBiquad;
 
 // Single polyphonic voice
 class CetoneSynthVoice
@@ -47,11 +54,27 @@ public:
 	void			InitArpeggiator(int arpDelay);
 	int				GetArpOffset(int arpMode, const int arpTable[8][16]);
 
+	// Filter management
+	void			UpdateFilter(float cutoff, float q, float mod);
+	void			SetFilterType(int type);
+	void			SetFilterMode(int mode);
+
 private:
 	// Audio components
 	CSynthOscillator*	Oscs[3];
 	CSynthEnvelope*		Envs[2];
 	CSynthLfo*			Lfo;
+	
+	// Per-voice filters (to maintain correct signal chain: osc→filter→env)
+	CFilterDirty*		FilterDirty;
+	CFilterMoog*		FilterMoog;
+	CFilterMoog2*		FilterMoog2;
+	CFilterCh12db*		FilterCh12db;
+	CFilter303*			Filter303;
+	CFilter8580*		Filter8580;
+	CFilterBiquad*		FilterBiquad;
+	int					filterType;
+	int					filterMode;
 
 	// Voice state
 	bool				isActive;

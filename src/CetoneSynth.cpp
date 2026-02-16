@@ -450,6 +450,15 @@ void CCetoneSynth::ReadProgram(int prg)
 	this->FilterType	=	p->FilterType;
 	this->FilterMode	=	p->FilterMode;
 
+#ifdef ENABLE_POLYPHONY
+	// Sync filter type and mode to all voices
+	for (int v = 0; v < MAX_POLYPHONY; v++)
+	{
+		this->Voices[v]->SetFilterType(this->FilterType);
+		this->Voices[v]->SetFilterMode(this->FilterMode);
+	}
+#endif
+
 	this->Cutoff		=	p->Cutoff;
 	this->Resonance		=	p->Resonance;
 

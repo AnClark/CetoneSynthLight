@@ -2,6 +2,9 @@
 
 //#include "aeffguieditor.h"
 #include "CetoneSynth.h"
+#ifdef ENABLE_POLYPHONY
+#include "CetoneSynthVoice.h"
+#endif
 
 extern bool TablesBuilt;
 
@@ -427,7 +430,17 @@ void CCetoneSynth::setParameter(VstInt32 index, float value)
 	case pCoarse:	this->MainCoarse = p->Coarse = c_val2coarse(value); break;
 	case pFine:		this->MainFine = p->Fine = c_val2fine(value); break;
 
-	case pFilterType:	this->FilterType = p->FilterType = pf2i(value, FTYPE_MAX); this->SetFilterMode(this->FilterMode); break;
+	case pFilterType:	
+		this->FilterType = p->FilterType = pf2i(value, FTYPE_MAX); 
+#ifdef ENABLE_POLYPHONY
+		// Sync filter type to all voices
+		for (int v = 0; v < MAX_POLYPHONY; v++)
+		{
+			this->Voices[v]->SetFilterType(this->FilterType);
+		}
+#endif
+		this->SetFilterMode(this->FilterMode); 
+		break;
 	case pFilterMode:	this->SetFilterMode(pf2i(value, FMODE_MAX)); break;
 
 	case pCutoff:		p->Cutoff = value; this->SetCutoffSave(p->Cutoff); break;
