@@ -337,12 +337,16 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 
 		// Normalize to prevent clipping when multiple voices are playing
 		// Use fixed normalization factor to avoid volume jumps when voice count changes
-		// Factor chosen to balance single-voice volume with polyphonic headroom
+		// Note: Each voice already normalized its oscillators (×0.333), so we only need
+		// to account for multiple voice mixing here, not re-normalize oscillators
 		if (activeCount > 0)
 		{
-			// Per-voice filter application maintains consistent signal level, so we can use a wider normalization factor.
-			// This factor is as same as the monophonic version (who mixes 3 OSCs together)
-			output *= 0.333333f;  // Approximately 1/3
+			// Balanced normalization factor: 0.75
+			// - Single voice: close to original level (-2.5dB, barely noticeable)
+			// - Multi-voice: safe headroom for ~4 voices at full volume
+			// - Trade-off between preserving single-voice dynamics and preventing
+			//   polyphonic clipping in typical playing scenarios
+			output *= 0.75f;
 		}
 
 		// NOTE: Filter is now applied per-voice in Voice::Render()
