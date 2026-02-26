@@ -336,18 +336,19 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		}
 
 		// Normalize to prevent clipping when multiple voices are playing
-		// Use fixed normalization factor to avoid volume jumps when voice count changes
+		// Use power-law normalization based on maximum polyphony (not active count)
+		// This provides smooth behavior without volume jumps as voice count changes
 		// Note: Each voice already normalized its oscillators (×0.333), so we only need
 		// to account for multiple voice mixing here, not re-normalize oscillators
 		if (activeCount > 0)
 		{
-			// Aggressive normalization factor: 0.2
-			// Compensates for main volume range up to 5.0 (allowing overdrive design)
-			// - Single voice: ±1.0 × 0.2 × 5.0 = ±1.0 (nominal level)
-			// - Multi-voice (4): ±4.0 × 0.2 × 5.0 = ±4.0 (handled by soft limiter)
-			// Trade-off: Preserves headroom for intentional overdrive effects while
-			// preventing extreme overflow that triggers DAW protection
-			output *= 0.2f;
+			// Power-law normalization: 1.0 / sqrt(maxPolyphony)
+			// For maxPolyphony=4: 1.0 / sqrt(4) = 0.5
+			// - Balances single-voice loudness with multi-voice headroom
+			// - Fixed factor prevents volume jumps during polyphonic playing
+			// - Compensates for main volume range up to 5.0 (allowing overdrive)
+			// Pre-calculated in constructor to avoid sqrt() in audio loop (performance optimization)
+			output *= this->polyphonyGainCompensation;
 		}
 
 		// NOTE: Filter is now applied per-voice in Voice::Render()
