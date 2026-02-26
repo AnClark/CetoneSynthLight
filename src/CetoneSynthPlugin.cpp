@@ -532,6 +532,9 @@ void CCetoneSynth::setParameter(VstInt32 index, float value)
 		this->maxPolyphony = (int)(value + 0.5f); // Round to nearest integer
 		if (this->maxPolyphony < 1) this->maxPolyphony = 1;
 		if (this->maxPolyphony > MAX_POLYPHONY) this->maxPolyphony = MAX_POLYPHONY;
+
+		// Update polyphony gain compensation when changing max polyphony
+		this->polyphonyGainCompensation = 1.0f / sqrtf((float)this->maxPolyphony);
 		break;
 #endif
 	}

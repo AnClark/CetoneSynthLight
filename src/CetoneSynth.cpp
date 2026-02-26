@@ -94,6 +94,9 @@ CCetoneSynth::CCetoneSynth()
 
 	this->activeVoiceCount = 0;
 	this->maxPolyphony = MAX_POLYPHONY;	// Default to maximum
+
+	// Pre-calculate gain compensation to avoid sqrt() in audio loop
+	this->polyphonyGainCompensation = 1.0f / sqrtf((float)this->maxPolyphony);
 #else
 	for(int i = 0; i < 3; i++)
 		this->Oscs[i] = new CSynthOscillator();

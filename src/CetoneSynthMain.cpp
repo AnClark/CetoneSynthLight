@@ -336,17 +336,19 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 		}
 
 		// Normalize to prevent clipping when multiple voices are playing
-		// Use fixed normalization factor to avoid volume jumps when voice count changes
+		// Use power-law normalization based on maximum polyphony (not active count)
+		// This provides smooth behavior without volume jumps as voice count changes
 		// Note: Each voice already normalized its oscillators (×0.333), so we only need
 		// to account for multiple voice mixing here, not re-normalize oscillators
 		if (activeCount > 0)
 		{
-			// Balanced normalization factor: 0.75
-			// - Single voice: close to original level (-2.5dB, barely noticeable)
-			// - Multi-voice: safe headroom for ~4 voices at full volume
-			// - Trade-off between preserving single-voice dynamics and preventing
-			//   polyphonic clipping in typical playing scenarios
-			output *= 0.75f;
+			// Power-law normalization: 1.0 / sqrt(maxPolyphony)
+			// For maxPolyphony=4: 1.0 / sqrt(4) = 0.5
+			// - Balances single-voice loudness with multi-voice headroom
+			// - Fixed factor prevents volume jumps during polyphonic playing
+			// - Compensates for main volume range up to 5.0 (allowing overdrive)
+			// Pre-calculated in constructor to avoid sqrt() in audio loop (performance optimization)
+			output *= this->polyphonyGainCompensation;
 		}
 
 		// NOTE: Filter is now applied per-voice in Voice::Render()
@@ -355,6 +357,14 @@ void CCetoneSynth::SynthProcess(float **inputs, float **outputs, VstInt32 sample
 
 		// Apply global volume and panning
 		output *= m_vol;
+
+		// Soft limiter: Prevent extreme overflow while preserving overdrive character
+		// Uses tanh() for smooth, musical saturation when main volume is pushed high
+		// - Linear behavior within ±1.5 range (transparent for normal levels)
+		// - Smooth compression beyond that (allows controlled overdrive)
+		// - Hard limit at ±2.0 (prevents DAW protection triggering at +6dBFS)
+		// This allows users to design overdriven sounds while maintaining output safety
+		output = tanhf(output * 0.5f) * 2.0f;
 
 		l = ((1.f - m_pan) * output);
 		r = (m_pan * output);
