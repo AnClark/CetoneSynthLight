@@ -52,6 +52,11 @@ void ImGuiUI::onImGuiDisplay()
     }
 
     //
+    // Handle message box queue.
+    //
+    _handleMessageBoxIdle();
+
+    //
     // Handle menu opening requests
     //
     // Here, variable `requestTestMenuOpen` acts as an "event flag" to request ImGui to show the menu.

@@ -59,6 +59,7 @@ dpf_add_plugin (${PROJECT_NAME}
         src/Fonts/CetoneFonts.cpp
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
+        src/Widgets/ImGui_UI_MessageBox.cpp
 )
 
 # NOTE: Do not set ENABLE_POLYPHONY globally, as it only affects plugin source files.

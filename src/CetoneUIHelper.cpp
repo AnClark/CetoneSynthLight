@@ -322,3 +322,28 @@ int CCetoneUI::_c_val2modMul(float value)
 {
     return floorf(value * 100.f + 0.5f);
 }
+
+void CCetoneUI::_requestMessageBox(std::string message)
+{
+    DISTRHO_SAFE_ASSERT_RETURN(fImGuiInstance.get(), )
+
+    fImGuiInstance->messageBoxQueue.push(std::string(message));
+}
+
+void CCetoneUI::logAndShowMessage(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    constexpr uint16_t MAX_MESSAGE_LENGTH = 512;
+    char buffer[MAX_MESSAGE_LENGTH] = {'\0'};
+    vsnprintf(buffer, MAX_MESSAGE_LENGTH, fmt, args);
+
+    va_end(args);
+
+    // Print log to console
+    d_stderr("%s", buffer);
+
+    // Show message box on UI side
+    _requestMessageBox(std::string(buffer));
+}
