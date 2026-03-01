@@ -15,6 +15,7 @@ add_subdirectory (dpf)
 
 include_directories (   
     src/
+    src/3rdparty/
     dpf-widgets/opengl/
 )
 
@@ -55,11 +56,15 @@ dpf_add_plugin (${PROJECT_NAME}
     FILES_UI
         src/CetoneUI.cpp
         src/CetoneUIHelper.cpp
+        src/PresetManager.cpp
+        src/PresetManagerHelper.cpp
         src/Images/CetoneArtwork.cpp
         src/Fonts/CetoneFonts.cpp
         dpf-widgets/opengl/DearImGui.cpp
         src/Widgets/ImGui_UI.cpp
         src/Widgets/ImGui_UI_MessageBox.cpp
+        src/Widgets/ImGui_UI_FileBrowser.cpp
+        src/Widgets/ImGui_UI_PresetManager.cpp
 )
 
 # NOTE: Do not set ENABLE_POLYPHONY globally, as it only affects plugin source files.

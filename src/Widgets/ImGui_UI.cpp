@@ -57,6 +57,11 @@ void ImGuiUI::onImGuiDisplay()
     _handleMessageBoxIdle();
 
     //
+    // Handle modal popup opening requests
+    //
+    _handlePresetModalPopupRequests();
+
+    //
     // Handle menu opening requests
     //
     // Here, variable `requestTestMenuOpen` acts as an "event flag" to request ImGui to show the menu.
@@ -286,11 +291,24 @@ void ImGuiUI::onImGuiDisplay()
     if (ImGui::Begin("Main Toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBackground))
     {
         ImGui::SetWindowPos(ImVec2(0, 60));
-        ImGui::SetWindowSize(ImVec2(100, 80));
+        ImGui::SetWindowSize(ImVec2(230, 80));
 
 #ifdef ENABLE_POLYPHONY
         // Polyphony switch
         {
+            ImGui::BeginGroup();
+
+            // HACK: Reduce vertical spacing between text and button, to make the toolbar more compact.
+            ImGuiStyle &style = ImGui::GetStyle();
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, 1.0f));            
+
+            // HACK: Make sure the text is vertically aligned with other controls to other texts on the same horizontal line (with ImGui::SameLine()),
+            //       when a text is placed at the beginning of a group, and you put another groups on the same line.
+            //       Normally, when multiple ImGui groups are placed in the same horizontal line, they are not vertically aligned.
+            //       This is an old and common issue in Dear ImGui.
+            //       @see <https://github.com/ocornut/imgui/issues/2317>
+            ImGui::AlignTextToFramePadding();
+
             ImGui::Text("Polyphony");
 
             String _buttonLabel = String(ui->fMaxPolyphony) + "##PolyphonyButton";
@@ -298,6 +316,9 @@ void ImGuiUI::onImGuiDisplay()
             {
                 ImGui::OpenPopup("Polyphony Config");
             }
+
+            ImGui::PopStyleVar();
+            ImGui::EndGroup();
         }
 
         // Polyphony configuration popup
@@ -336,14 +357,58 @@ void ImGuiUI::onImGuiDisplay()
 
             ImGui::EndPopup();
         }
+
+        ImGui::SameLine(0, 20);
 #endif
+
+        // Preset manager button
+        {
+            ImGui::BeginGroup();
+
+            ImGuiStyle &style = ImGui::GetStyle();
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, 1.0f));        
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Preset");
+
+            const String buttonLabel = ui->fCurrentPresetName + String(ui->fPresetIsModified ? "*" : "") + String("##PresetButton");
+            if (ImGui::Button(buttonLabel.buffer(), ImVec2(120, 0)))
+            {
+                _shouldRefreshBankList = true;
+                ImGui::OpenPopup("Preset Menu");
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::EndGroup();
+        }
+
+        // Preset manager menu
+        _buildPresetManagementMenu();
 
         ImGui::End();
     }
+
+    //
+    // Create modal popups
+    //
+
+    _buildPresetManagementPopups();
+
+    //
+    // Handle file browser dialog.
+    //
+
+    _handleFileBrowserIdle();
 }
 
 void ImGuiUI::_triggerParamUpdate(uint32_t paramId, float newValue)
 {
     ui->setParameterValue(paramId, newValue);   // Tell the DSP to update parameter value
     ui->parameterChanged(paramId, newValue);    // Request UI refresh
+
+    // Mark preset as modified when any parameter is changed
+    if (!ui->fPresetIsModified)
+    {
+        ui->_updateState(true);
+    }
 }
