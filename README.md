@@ -1,10 +1,12 @@
 # CetoneSynthLight
 
-CetoneSynthLight is a light-weight monophonic synthesizer by Neotec Software. It aims to give you a light but professional synthesizer experience. **Originally written by [René Jeschke](https://github.com/rjeschke).**
+CetoneSynthLight is a light-weight polyphonic synthesizer by Neotec Software. It aims to give you a light but professional synthesizer experience. **Originally written by [René Jeschke](https://github.com/rjeschke).**
 
 Sadly, Cetone Synth series had been discontinued for more than 12 years (since 2012), and it only supported VST 2.4. Original project is [here](https://github.com/rjeschke/cetonesynths).
 
 **But now, I (AnClark) brings it to life again, by re-implementing those plugins to [DISTRHO Plugin Framework](https://distrho.github.io/DPF/).** It now runs well on most modern platforms.
+
+Originally, CetoneSynthLight was a monophonic synth, but I have added polyphony support to it. So now it is a 16-voice polyphonic synthesizer.
 
 ![Screenshot of CetoneSynthLight](Screenshot.png)
 
@@ -20,16 +22,24 @@ Sadly, Cetone Synth series had been discontinued for more than 12 years (since 2
 - **4 modulation slots**
   - Specify source and destination correspondingly
   - Tunable modulation amount and multiply factor
+- **Full polyphony support**
+  - Up to 16 voices
+  - Tunable polyphony voice count
+  - Polyphony can be set to 1 for monophonic mode
 - 1 basic LFO
 - 2 AHDSR envelopes
   - Amplifier AHDSR
   - Modulation AHDSR
 - Glide (portamento) support
 - Simple arpeggiator
+  - Supports polyphonic arpeggiation (optional)
 - **Cross-platform**
   - Supports: Windows, macOS, Linux
 - **Multi-format**
-  - Provides: VST 2.4, VST3, LV2, CLAP, Standalone (JACK only)
+  - Provides: VST 2.4, VST3, LV2, CLAP, Standalone ([JACK](https://jackaudio.org/) only)
+- **Preset manager**
+  - Save and load presets in JSON format
+  - Preset manager menu with bank and program support
 
 ## How To Build
 
@@ -73,10 +83,10 @@ pacman -S git
 
 ```bash
 # Source tree has 1 submodule: DPF. So you need to add --recursive
-git clone https://github.com/AnClark/Minaton-XT.git minaton --recursive
+git clone https://github.com/AnClark/CetoneSynthLight.git cetonesynthlight --recursive
 
 # If you forget --recursive, run this
-cd minaton
+cd cetonesynthlight
 git submodule update --init --recursive
 ```
 
