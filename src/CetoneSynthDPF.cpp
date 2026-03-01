@@ -1,4 +1,6 @@
 #include "CetoneSynth.h"
+#include "Structures.h"  // For STATE_PRESET_NAME etc.
+#include "Defines.h"     // For DEFAULT_PRESET_NAME
 
 void CCetoneSynth::initParameter(uint32_t index, Parameter& parameter)
 {
@@ -83,4 +85,55 @@ void CCetoneSynth::sampleRateChanged(double newSampleRate)
 void CCetoneSynth::bufferSizeChanged(int newBufferSize)
 {
     this->setBlockSize(newBufferSize);
+}
+
+void CCetoneSynth::initState(uint32_t index, State& state)
+{
+    switch (index)
+    {
+    case 0:
+        state.key = STATE_PRESET_NAME;
+        state.defaultValue = DEFAULT_PRESET_NAME;
+        this->PresetName = DEFAULT_PRESET_NAME;
+        break;
+    case 1:
+        state.key = STATE_PRESET_MODIFIED;
+        state.defaultValue = "false";
+        this->PresetModified = false;
+        break;
+    case 2:
+        state.key = STATE_PRESET_BANK;
+        state.defaultValue = FACTORY_BANK_NAME;
+        this->PresetBank = FACTORY_BANK_NAME;
+        break;
+    }
+
+    state.hints = kStateIsHostWritable;
+}
+
+String CCetoneSynth::getState(const char* key) const
+{
+    static const String sTrue ("true");
+    static const String sFalse("false");
+
+    if (std::strcmp(key, STATE_PRESET_NAME) == 0)
+        return PresetName;
+    else if (std::strcmp(key, STATE_PRESET_MODIFIED) == 0)
+        return PresetModified ? sTrue : sFalse;
+    else if (std::strcmp(key, STATE_PRESET_BANK) == 0)
+        return PresetBank;
+
+    return String();
+}
+
+void CCetoneSynth::setState(const char* key, const char* value)
+{
+    const bool valueOnOff = (std::strcmp(value, "true") == 0);
+
+    if (std::strcmp(key, STATE_PRESET_NAME) == 0)
+        PresetName = value;
+    else if (std::strcmp(key, STATE_PRESET_MODIFIED) == 0)
+        PresetModified = valueOnOff;
+    else if (std::strcmp(key, STATE_PRESET_BANK) == 0)
+        PresetBank = value;
 }

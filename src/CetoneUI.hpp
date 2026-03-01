@@ -5,6 +5,7 @@
 #include "NanoVG.hpp"
 
 #include "Widgets/ImGui_UI.hpp"
+#include "PresetManager.h"
 
 using DGL_NAMESPACE::ImageAboutWindow;
 using DGL_NAMESPACE::ImageButton;
@@ -30,6 +31,7 @@ protected:
     // DSP Callbacks
 
     void parameterChanged(uint32_t index, float value) override;
+    void stateChanged(const char *key, const char *value) override;
 
     // -------------------------------------------------------------------
     // Widget Callbacks
@@ -49,6 +51,11 @@ protected:
     // Other Callbacks
 
     void idleCallback() override;
+
+    // -------------------------------------------------------------------
+    // UI Tools (only invoked by CCetoneUI and its friend classes)
+
+    void logAndShowMessage(const char* fmt, ...);
 
 private:
     // -------------------------------------------------------------------
@@ -146,6 +153,35 @@ private:
     int _c_val2pw(float value);
     int _c_val2modAmount(float value);
     int _c_val2modMul(float value);
+
+    // -------------------------------------------------------------------
+    // Log / MessageBox helpers
+
+    void _requestMessageBox(std::string message);
+
+    // -------------------------------------------------------------------
+    // Preset Manager Instance
+
+    ScopedPointer<CPresetManager> fPresetManager;
+    friend class CPresetManager;
+
+    String fCurrentPresetName;
+    String fCurrentPresetBank;  // Bank name: DEFAULT_USER_BANK_NAME, BANK_NAME_FOR_SINGLE_IMPORTED_PRESET or any imported bank name
+    bool fPresetIsModified;
+
+    // -------------------------------------------------------------------
+    // State helpers (update, validation, fallback)
+
+    bool fPresetNameStateChecked, fBankNameStateChecked;
+    String fPendingPresetName, fPendingBankName;
+
+    void _updateState(const char* newPresetName, const char* newBankName, bool isModified);
+    void _updateState(bool isModified);
+    void _triggerDummyParameterChange();
+
+    bool _validatePresetAndBankState(const String& presetName, const String& bankName);
+    void _fallbackToDefaultStateOfPreset();
+    void _fallbackToDefaultStateOfBank();
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CCetoneUI)
 };

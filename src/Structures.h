@@ -179,3 +179,11 @@ enum PARAMETERS
 
 	pParameters
 };
+
+// -----------------------------------------------------------------------
+// Preset state constants (used by DPF state system)
+
+constexpr auto STATE_COUNT = 3;
+static const char* STATE_PRESET_NAME     = "presetName";
+static const char* STATE_PRESET_MODIFIED = "presetModified";
+static const char* STATE_PRESET_BANK     = "presetBank";

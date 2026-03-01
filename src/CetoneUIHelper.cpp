@@ -1,5 +1,11 @@
 #include "CetoneUI.hpp"
 #include "Defines.h"
+#include "Structures.h"
+
+#include <cstdarg>
+#include <cstdio>
+#include <map>
+#include <vector>
 
 constexpr float PARAM_MIN_VALUE = 0.0f;
 constexpr float PARAM_MAX_VALUE = 1.0f;
@@ -321,4 +327,136 @@ int CCetoneUI::_c_val2modAmount(float value)
 int CCetoneUI::_c_val2modMul(float value)
 {
     return floorf(value * 100.f + 0.5f);
+}
+
+void CCetoneUI::_requestMessageBox(std::string message)
+{
+    DISTRHO_SAFE_ASSERT_RETURN(fImGuiInstance.get(), )
+
+    fImGuiInstance->messageBoxQueue.push(std::string(message));
+}
+
+void CCetoneUI::logAndShowMessage(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    constexpr uint16_t MAX_MESSAGE_LENGTH = 512;
+    char buffer[MAX_MESSAGE_LENGTH] = {'\0'};
+    vsnprintf(buffer, MAX_MESSAGE_LENGTH, fmt, args);
+
+    va_end(args);
+
+    // Print log to console
+    d_stderr("%s", buffer);
+
+    // Show message box on UI side
+    _requestMessageBox(std::string(buffer));
+}
+
+void CCetoneUI::_updateState(const char* newPresetName, const char* newBankName, bool isModified)
+{
+    // Update local storage
+    this->fCurrentPresetName = newPresetName;
+    this->fCurrentPresetBank = newBankName;
+    this->fPresetIsModified = isModified;
+
+    // Send state to DSP side
+    this->setState(STATE_PRESET_NAME, newPresetName);
+    this->setState(STATE_PRESET_BANK, newBankName);
+    this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+
+    // Request host to mark project as dirty and enable undo
+    _triggerDummyParameterChange();
+}
+
+void CCetoneUI::_updateState(bool isModified)
+{
+    this->fPresetIsModified = isModified;
+    this->setState(STATE_PRESET_MODIFIED, isModified ? "true" : "false");
+
+    // NOTE: This function overload is only invoked in widget callbacks when parameters
+    //       are changed by user interaction, so we don't need to call
+    //       _triggerDummyParameterChange() here.
+}
+
+void CCetoneUI::_triggerDummyParameterChange()
+{
+    // Notify host that parameters have been changed by current preset,
+    // so that host can mark project as dirty and enable undo.
+    editParameter(0, true);
+    editParameter(0, false);
+}
+
+bool CCetoneUI::_validatePresetAndBankState(const String& presetName, const String& bankName)
+{
+    // Single imported preset: lives in memory only (not backed by any bank file).
+    // We cannot verify it on disk, so trust whatever the host says.
+    if (bankName == BANK_NAME_FOR_SINGLE_IMPORTED_PRESET) {
+        return true;
+    }
+
+    // Factory bank: only "Init Patch" is valid
+    if (bankName == FACTORY_BANK_NAME) {
+        return (presetName == DEFAULT_PRESET_NAME);
+    }
+
+    std::vector<String> defaultBankPresets;
+    std::vector<String> importedBanks;
+    std::map<std::string, std::vector<String>> importedBankPresets;
+
+    // Fetch the newest list of presets (default bank)
+    for (size_t i = 0; i < fPresetManager->getDefaultBankPresetCount(); i++)
+        defaultBankPresets.push_back(fPresetManager->getDefaultBankPresetName(i));
+
+    // Fetch the newest list of banks and presets (imported banks)
+    importedBanks = fPresetManager->getImportedBankNames();
+    importedBankPresets.clear();
+    for (const auto& bank : importedBanks)
+        importedBankPresets[bank.buffer()] = fPresetManager->getPresetsInBank(bank.buffer());
+
+    if (bankName == DEFAULT_USER_BANK_NAME) {
+        // Check if the specific preset exists in default bank
+        for (const auto& preset : defaultBankPresets) {
+            if (presetName == preset) {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        // Imported bank preset: check if bank and preset still exist
+        auto it = importedBankPresets.find(bankName.buffer());
+        if (it != importedBankPresets.end()) {
+            const std::vector<String>& presets = it->second;
+            for (const auto& preset : presets) {
+                if (presetName == preset) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+void CCetoneUI::_fallbackToDefaultStateOfPreset()
+{
+    // Correct UI metadata to default state when the host reverts to a snapshot
+    // that references a bank or preset that no longer exists on disk.
+    fCurrentPresetName = DEFAULT_PRESET_NAME;
+    fPresetIsModified  = true; // Parameters no longer match any saved preset
+    setState(STATE_PRESET_NAME,     DEFAULT_PRESET_NAME);
+    setState(STATE_PRESET_MODIFIED, "true");
+
+    _triggerDummyParameterChange();
+}
+
+void CCetoneUI::_fallbackToDefaultStateOfBank()
+{
+    // Correct UI metadata to default (factory) bank state.
+    fCurrentPresetBank = FACTORY_BANK_NAME;
+    fPresetIsModified  = true;
+    setState(STATE_PRESET_BANK,     FACTORY_BANK_NAME);
+    setState(STATE_PRESET_MODIFIED, "true");
+
+    _triggerDummyParameterChange();
 }

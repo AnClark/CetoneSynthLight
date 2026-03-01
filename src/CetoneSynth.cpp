@@ -72,7 +72,7 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 #endif
 
 CCetoneSynth::CCetoneSynth() 
-: DISTRHO::Plugin (pParameters, 0, 0) // parameters, programs, states
+: DISTRHO::Plugin (pParameters, 0, STATE_COUNT) // parameters, programs, states
 {
 	CCetoneSynth::Pi				=	4.f * atanf(1.f);	
 	CCetoneSynth::SampleRate		=	44100.f;
