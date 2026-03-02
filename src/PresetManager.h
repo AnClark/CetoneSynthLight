@@ -39,6 +39,7 @@ protected:
     void   initFactoryPrograms();
 public:
     String getFactoryProgramName(uint32_t index) const;
+    int    getFactoryProgramCount() const { return static_cast<int>(FactoryPrograms.size()); }
     void   loadFactoryProgram(uint32_t index);
 
     // -------------------------------------------------------------------
@@ -92,7 +93,7 @@ public:
 private:
     CCetoneUI*   ui; // UI instance
     PresetBank   fDefaultUserBank; // Default User Preset Bank
-    SynthProgram FactoryPrograms[FACTORY_PROGRAM_COUNT]; // Factory preset data (in memory)
+    std::vector<SynthProgram> FactoryPrograms; // Factory preset data (in memory)
 
     // -------------------------------------------------------------------
     // Inner Helpers

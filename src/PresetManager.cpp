@@ -216,18 +216,18 @@ void CPresetManager::loadDefaultProgram() {
 }
 
 void CPresetManager::initFactoryPrograms() {
-    // Copy the built-in DefaultProgram into FactoryPrograms[0] ("Init Patch").
+    // Add the built-in DefaultProgram into FactoryPrograms as the first factory preset ("Init Patch").
     // Additional factory presets can be added here in the future.
-    std::memcpy(&FactoryPrograms[0], &DefaultProgram, sizeof(SynthProgram));
+    FactoryPrograms.push_back(DefaultProgram);
 }
 
 String CPresetManager::getFactoryProgramName(uint32_t index) const {
-    DISTRHO_SAFE_ASSERT_RETURN(index < FACTORY_PROGRAM_COUNT, String())
+    DISTRHO_SAFE_ASSERT_RETURN(index < FactoryPrograms.size(), String())
     return String(FactoryPrograms[index].Name);
 }
 
 void CPresetManager::loadFactoryProgram(uint32_t index) {
-    DISTRHO_SAFE_ASSERT_RETURN(index < FACTORY_PROGRAM_COUNT, )
+    DISTRHO_SAFE_ASSERT_RETURN(index < FactoryPrograms.size(), )
     loadProgram(FactoryPrograms[index]);
 }
 
@@ -1022,7 +1022,7 @@ bool CPresetManager::loadPresetFromBank(const char* bankName, const char* preset
         return false;
 
     if (_isFactoryBank(bankName)) {
-        for (uint32_t i = 0; i < FACTORY_PROGRAM_COUNT; i++) {
+        for (uint32_t i = 0; i < FactoryPrograms.size(); i++) {
             if (std::strcmp(FactoryPrograms[i].Name, presetName) == 0) {
                 loadFactoryProgram(i);
                 return true;
@@ -1058,7 +1058,7 @@ std::vector<String> CPresetManager::getPresetsInBank(const char* bankName) {
         return presetNames;
 
     if (_isFactoryBank(bankName)) {
-        for (uint32_t i = 0; i < FACTORY_PROGRAM_COUNT; i++) {
+        for (uint32_t i = 0; i < FactoryPrograms.size(); i++) {
             presetNames.push_back(String(FactoryPrograms[i].Name));
         }
         return presetNames;
