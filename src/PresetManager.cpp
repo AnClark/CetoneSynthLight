@@ -106,6 +106,10 @@ static const SynthProgram DefaultProgram = {
     },
 
     0.0f, // EnvMod
+
+#ifdef ENABLE_POLYPHONY
+    16,      // MaxPolyphony (default: 16 = full polyphonic)
+#endif
 };
 
 // ============================================================================
@@ -205,9 +209,7 @@ void CPresetManager::loadProgram(const SynthProgram& program) {
                         clampf((program.EnvMod + 1.0f) / 2.0f, 0.0f, 1.0f));
 
 #ifdef ENABLE_POLYPHONY
-    if (ui->fMaxPolyphony > 0) {
-        _triggerParamUpdate(pMaxPolyphony, static_cast<float>(ui->fMaxPolyphony));
-    }
+    _triggerParamUpdate(pMaxPolyphony, static_cast<float>(program.MaxPolyphony));
 #endif
 }
 
@@ -336,10 +338,7 @@ SynthProgram CPresetManager::captureCurrentParameters() const {
     snapshot.EnvMod = (ui->fKnobFilterParameter->getValue() - 0.5f) * 2.0f;
 
 #ifdef ENABLE_POLYPHONY
-    // maxPolyphony is tracked in fMaxPolyphony; it is NOT a regular knob
-    // so we just store the current setting
-    // (This field is not serialized into the SynthProgram struct,
-    //  but we keep it for completeness if ENABLE_POLYPHONY is defined.)
+    snapshot.MaxPolyphony = ui->fMaxPolyphony;
 #endif
 
     return snapshot;
@@ -381,7 +380,8 @@ String CPresetManager::serializeBankToJSON(const PresetBank& bank) const {
             p["arpMode"]  = preset.ArpMode;
             p["arpSpeed"] = preset.ArpSpeed;
 #ifdef ENABLE_POLYPHONY
-            p["arpPoly"] = preset.ArpPoly;
+            p["arpPoly"]       = preset.ArpPoly;
+            p["maxPolyphony"] = preset.MaxPolyphony;
 #endif
 
             // Oscillators
@@ -494,7 +494,8 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
             if (pj.contains("arpMode"))  preset.ArpMode  = pj["arpMode"];
             if (pj.contains("arpSpeed")) preset.ArpSpeed = pj["arpSpeed"];
 #ifdef ENABLE_POLYPHONY
-            if (pj.contains("arpPoly"))  preset.ArpPoly  = pj["arpPoly"];
+            if (pj.contains("arpPoly"))      preset.ArpPoly      = pj["arpPoly"];
+            if (pj.contains("maxPolyphony")) preset.MaxPolyphony = pj["maxPolyphony"];
 #endif
 
             // Oscillators

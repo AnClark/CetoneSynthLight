@@ -89,6 +89,10 @@ struct SynthProgram
 	SynthModulation	Modulations[4];
 
 	float			EnvMod;
+
+#ifdef ENABLE_POLYPHONY
+	int				MaxPolyphony;	// Maximum number of polyphonic voices (1-16)
+#endif
 };
 
 enum PARAMETERS
