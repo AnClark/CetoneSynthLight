@@ -482,6 +482,10 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
                 std::string name = pj["name"];
                 strncpy(preset.Name, name.c_str(), 63);
                 preset.Name[63] = '\0';
+            } else {
+                d_stderr("deserializeBankFromJSON: Preset missing name. Will specify a fallback name");
+                strncpy(preset.Name, PRESET_NO_NAME_FALLBACK, 63);
+                preset.Name[63] = '\0';
             }
 
             // Global

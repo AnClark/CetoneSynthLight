@@ -114,6 +114,7 @@
 
 // Preset Manager Constants
 #define DEFAULT_PRESET_NAME "Init Patch"
+#define PRESET_NO_NAME_FALLBACK "Unnamed Preset"  // In case no name is provided in the preset file
 
 #define DEFAULT_USER_BANK_FILENAME "Default.clightbank"
 #define DEFAULT_USER_BANK_NAME "Default Bank"
