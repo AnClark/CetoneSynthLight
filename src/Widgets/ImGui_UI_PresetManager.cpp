@@ -59,15 +59,22 @@ void ImGuiUI::_buildPresetManagementMenu()
             // Factory Presets (built-in, read-only)
             if (ImGui::BeginMenu("Factory Presets"))
             {
-                for (uint32_t i = 0; i < FACTORY_PROGRAM_COUNT; i++)
+                if (ui->fPresetManager->getFactoryProgramCount() == 0)
                 {
-                    const String presetNameLabel = ui->fPresetManager->getFactoryProgramName(i)
-                                                   + String("##FactoryPreset") + String(i);
-                    if (ImGui::MenuItem(presetNameLabel.buffer()))
+                    ImGui::MenuItem("(No presets)", nullptr, false, false);
+                }
+                else
+                {
+                    for (uint32_t i = 0; i < ui->fPresetManager->getFactoryProgramCount(); i++)
                     {
-                        ui->fPresetManager->loadFactoryProgram(i);
-                        ui->_updateState(ui->fPresetManager->getFactoryProgramName(i).buffer(),
-                                         FACTORY_BANK_NAME, false);
+                        const String presetNameLabel = ui->fPresetManager->getFactoryProgramName(i)
+                                                    + String("##FactoryPreset") + String(i);
+                        if (ImGui::MenuItem(presetNameLabel.buffer()))
+                        {
+                            ui->fPresetManager->loadFactoryProgram(i);
+                            ui->_updateState(ui->fPresetManager->getFactoryProgramName(i).buffer(),
+                                            FACTORY_BANK_NAME, false);
+                        }
                     }
                 }
                 ImGui::EndMenu();

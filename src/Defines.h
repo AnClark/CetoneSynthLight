@@ -122,5 +122,4 @@
 #define USER_PRESET_BANK_SUBDIR "Banks"
 
 #define FACTORY_BANK_NAME "Factory"                           // Virtual bank for built-in factory presets (read-only, not stored on disk)
-#define FACTORY_PROGRAM_COUNT 1                               // Number of factory presets
 #define BANK_NAME_FOR_SINGLE_IMPORTED_PRESET "@@@Imported@@@" // Special marker to avoid conflicts with user bank names
