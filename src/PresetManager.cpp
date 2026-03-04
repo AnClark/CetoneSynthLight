@@ -576,22 +576,222 @@ bool CPresetManager::deserializeBankFromJSON(const String& jsonString,
 }
 
 String CPresetManager::serializePresetToJSON(const SynthProgram& preset) const {
-    // Wrap single preset in a minimal "bank" and serialize
-    PresetBank tempBank;
-    tempBank.Name = String(preset.Name);
-    tempBank.Presets.push_back(preset);
-    return serializeBankToJSON(tempBank);
+    try {
+        json j;
+        j["formatVersion"] = "1.0.0";
+        j["presetType"]    = "singlePreset";
+
+        // Name
+        j["name"] = preset.Name;
+
+        // Global
+        j["volume"]  = preset.Volume;
+        j["panning"] = preset.Panning;
+        j["coarse"]  = preset.Coarse;
+        j["fine"]    = preset.Fine;
+
+        // Filter
+        j["cutoff"]     = preset.Cutoff;
+        j["resonance"]  = preset.Resonance;
+        j["filterType"] = preset.FilterType;
+        j["filterMode"] = preset.FilterMode;
+
+        // Portamento
+        j["portaMode"]  = preset.PortaMode;
+        j["portaSpeed"] = preset.PortaSpeed;
+
+        // Arpeggio
+        j["arpMode"]  = preset.ArpMode;
+        j["arpSpeed"] = preset.ArpSpeed;
+#ifdef ENABLE_POLYPHONY
+        j["arpPoly"] = preset.ArpPoly;
+#endif
+
+        // Envelopes [0]=Amp, [1]=Mod
+        for (int i = 0; i < 2; i++) {
+            std::string p = "env" + std::to_string(i + 1);
+            j[p + "Attack"]  = preset.Attack[i];
+            j[p + "Hold"]    = preset.Hold[i];
+            j[p + "Decay"]   = preset.Decay[i];
+            j[p + "Sustain"] = preset.Sustain[i];
+            j[p + "Release"] = preset.Release[i];
+        }
+
+        // LFO
+        j["lfoSpeed"]   = preset.LfoSpeed;
+        j["lfoWave"]    = preset.LfoWave;
+        j["lfoPw"]      = preset.LfoPw;
+        j["lfoTrigger"] = preset.LfoTrigger;
+
+        // Oscillators (Voice[0..2]; Voice[3] is unused)
+        json voices = json::array();
+        for (int i = 0; i < 3; i++) {
+            json v;
+            v["volume"] = preset.Voice[i].Volume;
+            v["coarse"] = preset.Voice[i].Coarse;
+            v["fine"]   = preset.Voice[i].Fine;
+            v["wave"]   = preset.Voice[i].Wave;
+            v["pw"]     = preset.Voice[i].Pw;
+            v["ring"]   = preset.Voice[i].Ring;
+            v["sync"]   = preset.Voice[i].Sync;
+            voices.push_back(v);
+        }
+        j["voices"] = voices;
+
+        // Modulation matrix (4 slots)
+        json mods = json::array();
+        for (int i = 0; i < 4; i++) {
+            json m;
+            m["source"]        = preset.Modulations[i].Source;
+            m["destination"]   = preset.Modulations[i].Destination;
+            m["amount"]        = preset.Modulations[i].Amount;
+            m["multiplicator"] = preset.Modulations[i].Multiplicator;
+            mods.push_back(m);
+        }
+        j["modulations"] = mods;
+
+        // Filter envelope mod
+        j["envMod"] = preset.EnvMod;
+
+#ifdef ENABLE_POLYPHONY
+        j["maxPolyphony"] = preset.MaxPolyphony;
+#endif
+
+        return String(j.dump(2).c_str());
+    } catch (const std::exception& e) {
+        d_stderr("serializePresetToJSON: Exception - %s", e.what());
+        return String();
+    }
 }
 
 bool CPresetManager::deserializePresetFromJSON(const String& jsonString,
                                                SynthProgram& outPreset) const {
-    PresetBank tempBank;
-    if (!deserializeBankFromJSON(jsonString, tempBank))
+    if (jsonString.isEmpty()) {
+        d_stderr("deserializePresetFromJSON: Empty JSON string");
         return false;
-    if (tempBank.Presets.empty())
+    }
+
+    try {
+        json j = json::parse(jsonString.buffer());
+
+        // Validate format version
+        if (!j.contains("formatVersion")) {
+            d_stderr("deserializePresetFromJSON: Missing formatVersion");
+            return false;
+        }
+        std::string version = j["formatVersion"];
+        if (version != "1.0.0") {
+            d_stderr("deserializePresetFromJSON: Unsupported version '%s'", version.c_str());
+            return false;
+        }
+
+        // Reject bank files passed by mistake
+        if (j.contains("bankName") || j.contains("presets")) {
+            d_stderr("deserializePresetFromJSON: This is a bank file, not a "
+                     "single preset. Use importBankFromFile() instead.");
+            return false;
+        }
+
+        // Validate presetType if present
+        if (j.contains("presetType")) {
+            std::string pt = j["presetType"].get<std::string>();
+            if (pt != "singlePreset") {
+                d_stderr("deserializePresetFromJSON: Invalid presetType '%s'. Expect 'singlePreset'.", pt.c_str());
+                return false;
+            }
+        }
+
+        std::memset(&outPreset, 0, sizeof(SynthProgram));
+
+        // Name
+        if (j.contains("name")) {
+            std::string name = j["name"];
+            std::strncpy(outPreset.Name, name.c_str(), 63);
+            outPreset.Name[63] = '\0';
+        }
+
+        // Global
+        if (j.contains("volume"))  outPreset.Volume  = j["volume"];
+        if (j.contains("panning")) outPreset.Panning = j["panning"];
+        if (j.contains("coarse"))  outPreset.Coarse  = j["coarse"];
+        if (j.contains("fine"))    outPreset.Fine    = j["fine"];
+
+        // Filter
+        if (j.contains("cutoff"))     outPreset.Cutoff     = j["cutoff"];
+        if (j.contains("resonance"))  outPreset.Resonance  = j["resonance"];
+        if (j.contains("filterType")) outPreset.FilterType = j["filterType"];
+        if (j.contains("filterMode")) outPreset.FilterMode = j["filterMode"];
+
+        // Portamento
+        if (j.contains("portaMode"))  outPreset.PortaMode  = j["portaMode"];
+        if (j.contains("portaSpeed")) outPreset.PortaSpeed = j["portaSpeed"];
+
+        // Arpeggio
+        if (j.contains("arpMode"))  outPreset.ArpMode  = j["arpMode"];
+        if (j.contains("arpSpeed")) outPreset.ArpSpeed = j["arpSpeed"];
+#ifdef ENABLE_POLYPHONY
+        if (j.contains("arpPoly")) outPreset.ArpPoly = j["arpPoly"];
+#endif
+
+        // Envelopes
+        for (int i = 0; i < 2; i++) {
+            std::string p = "env" + std::to_string(i + 1);
+            if (j.contains(p + "Attack"))  outPreset.Attack[i]  = j[p + "Attack"];
+            if (j.contains(p + "Hold"))    outPreset.Hold[i]    = j[p + "Hold"];
+            if (j.contains(p + "Decay"))   outPreset.Decay[i]   = j[p + "Decay"];
+            if (j.contains(p + "Sustain")) outPreset.Sustain[i] = j[p + "Sustain"];
+            if (j.contains(p + "Release")) outPreset.Release[i] = j[p + "Release"];
+        }
+
+        // LFO
+        if (j.contains("lfoSpeed"))   outPreset.LfoSpeed   = j["lfoSpeed"];
+        if (j.contains("lfoWave"))    outPreset.LfoWave    = j["lfoWave"];
+        if (j.contains("lfoPw"))      outPreset.LfoPw      = j["lfoPw"];
+        if (j.contains("lfoTrigger")) outPreset.LfoTrigger = j["lfoTrigger"];
+
+        // Oscillators
+        if (j.contains("voices") && j["voices"].is_array()) {
+            const auto& voices = j["voices"];
+            for (size_t i = 0; i < voices.size() && i < 3; i++) {
+                const auto& v = voices[i];
+                if (v.contains("volume")) outPreset.Voice[i].Volume = v["volume"];
+                if (v.contains("coarse")) outPreset.Voice[i].Coarse = v["coarse"];
+                if (v.contains("fine"))   outPreset.Voice[i].Fine   = v["fine"];
+                if (v.contains("wave"))   outPreset.Voice[i].Wave   = v["wave"];
+                if (v.contains("pw"))     outPreset.Voice[i].Pw     = v["pw"];
+                if (v.contains("ring"))   outPreset.Voice[i].Ring   = v["ring"];
+                if (v.contains("sync"))   outPreset.Voice[i].Sync   = v["sync"];
+            }
+        }
+
+        // Modulation matrix
+        if (j.contains("modulations") && j["modulations"].is_array()) {
+            const auto& mods = j["modulations"];
+            for (size_t i = 0; i < mods.size() && i < 4; i++) {
+                const auto& m = mods[i];
+                if (m.contains("source"))        outPreset.Modulations[i].Source        = m["source"];
+                if (m.contains("destination"))   outPreset.Modulations[i].Destination   = m["destination"];
+                if (m.contains("amount"))        outPreset.Modulations[i].Amount        = m["amount"];
+                if (m.contains("multiplicator")) outPreset.Modulations[i].Multiplicator = m["multiplicator"];
+            }
+        }
+
+        // Filter envelope mod
+        if (j.contains("envMod")) outPreset.EnvMod = j["envMod"];
+
+#ifdef ENABLE_POLYPHONY
+        if (j.contains("maxPolyphony")) outPreset.MaxPolyphony = j["maxPolyphony"];
+#endif
+
+        d_stderr("Successfully loaded preset '%s'", outPreset.Name);
+        return true;
+    } catch (const json::parse_error& e) {
+        d_stderr("deserializePresetFromJSON: JSON parse error - %s", e.what());
         return false;
-    outPreset = tempBank.Presets[0];
-    return true;
+    } catch (const std::exception& e) {
+        d_stderr("deserializePresetFromJSON: Exception - %s", e.what());
+        return false;
+    }
 }
 
 bool CPresetManager::exportCurrentPresetToFile(const char* filePath) {

@@ -116,98 +116,92 @@ static bool parsePresetFromJSON(const std::string& jsonText, SynthProgram& out)
         return false;
     }
 
-    // The .clight format wraps the preset in a single-element bank object.
-    if (!j.contains("presets") || !j["presets"].is_array() ||
-        j["presets"].empty()) {
+    // Validate: must be a singlePreset file (not a bank file)
+    if (!j.contains("formatVersion"))
         return false;
-    }
+    if (j["formatVersion"].get<std::string>() != "1.0.0")
+        return false;
+    if (j.contains("bankName") || j.contains("presets"))
+        return false; // This is a bank file, not a single preset
 
-    const json& pj = j["presets"][0];
     memset(&out, 0, sizeof(SynthProgram));
 
     // Name
-    if (pj.contains("name")) {
-        std::string n = pj["name"];
+    if (j.contains("name")) {
+        std::string n = j["name"];
         strncpy(out.Name, n.c_str(), 63);
         out.Name[63] = '\0';
     }
 
     // Global
-    if (pj.contains("volume"))  out.Volume  = pj["volume"];
-    if (pj.contains("panning")) out.Panning = pj["panning"];
-    if (pj.contains("coarse"))  out.Coarse  = pj["coarse"];
-    if (pj.contains("fine"))    out.Fine    = pj["fine"];
+    if (j.contains("volume"))  out.Volume  = j["volume"];
+    if (j.contains("panning")) out.Panning = j["panning"];
+    if (j.contains("coarse"))  out.Coarse  = j["coarse"];
+    if (j.contains("fine"))    out.Fine    = j["fine"];
 
     // Filter
-    if (pj.contains("filterType")) out.FilterType = pj["filterType"];
-    if (pj.contains("filterMode")) out.FilterMode = pj["filterMode"];
-    if (pj.contains("cutoff"))     out.Cutoff     = pj["cutoff"];
-    if (pj.contains("resonance"))  out.Resonance  = pj["resonance"];
+    if (j.contains("cutoff"))     out.Cutoff     = j["cutoff"];
+    if (j.contains("resonance"))  out.Resonance  = j["resonance"];
+    if (j.contains("filterType")) out.FilterType = j["filterType"];
+    if (j.contains("filterMode")) out.FilterMode = j["filterMode"];
 
     // Portamento
-    if (pj.contains("portaMode"))  out.PortaMode  = pj["portaMode"];
-    if (pj.contains("portaSpeed")) out.PortaSpeed = pj["portaSpeed"];
+    if (j.contains("portaMode"))  out.PortaMode  = j["portaMode"];
+    if (j.contains("portaSpeed")) out.PortaSpeed = j["portaSpeed"];
 
     // Arpeggio
-    if (pj.contains("arpMode"))  out.ArpMode  = pj["arpMode"];
-    if (pj.contains("arpSpeed")) out.ArpSpeed = pj["arpSpeed"];
+    if (j.contains("arpMode"))  out.ArpMode  = j["arpMode"];
+    if (j.contains("arpSpeed")) out.ArpSpeed = j["arpSpeed"];
 #ifdef ENABLE_POLYPHONY
-    if (pj.contains("arpPoly"))      out.ArpPoly      = pj["arpPoly"];
-    if (pj.contains("maxPolyphony")) out.MaxPolyphony = pj["maxPolyphony"];
+    if (j.contains("arpPoly"))      out.ArpPoly      = j["arpPoly"];
+    if (j.contains("maxPolyphony")) out.MaxPolyphony = j["maxPolyphony"];
 #endif
 
-    // Oscillators (Voice[0..2]; Voice[3] is unused in the JSON format)
-    for (int i = 0; i < 3; i++) {
-        char key[32];
-        std::snprintf(key, sizeof(key), "osc%dVolume", i + 1);
-        if (pj.contains(key)) out.Voice[i].Volume = pj[key];
-        std::snprintf(key, sizeof(key), "osc%dCoarse", i + 1);
-        if (pj.contains(key)) out.Voice[i].Coarse = pj[key];
-        std::snprintf(key, sizeof(key), "osc%dFine", i + 1);
-        if (pj.contains(key)) out.Voice[i].Fine   = pj[key];
-        std::snprintf(key, sizeof(key), "osc%dWave", i + 1);
-        if (pj.contains(key)) out.Voice[i].Wave   = pj[key];
-        std::snprintf(key, sizeof(key), "osc%dPw", i + 1);
-        if (pj.contains(key)) out.Voice[i].Pw     = pj[key];
-        std::snprintf(key, sizeof(key), "osc%dRing", i + 1);
-        if (pj.contains(key)) out.Voice[i].Ring   = pj[key];
-        std::snprintf(key, sizeof(key), "osc%dSync", i + 1);
-        if (pj.contains(key)) out.Voice[i].Sync   = pj[key];
+    // Envelopes
+    for (int i = 0; i < 2; i++) {
+        std::string p = "env" + std::to_string(i + 1);
+        if (j.contains(p + "Attack"))  out.Attack[i]  = j[p + "Attack"];
+        if (j.contains(p + "Hold"))    out.Hold[i]    = j[p + "Hold"];
+        if (j.contains(p + "Decay"))   out.Decay[i]   = j[p + "Decay"];
+        if (j.contains(p + "Sustain")) out.Sustain[i] = j[p + "Sustain"];
+        if (j.contains(p + "Release")) out.Release[i] = j[p + "Release"];
     }
 
-    // Envelopes
-    if (pj.contains("env1Attack"))  out.Attack[0]  = pj["env1Attack"];
-    if (pj.contains("env1Hold"))    out.Hold[0]    = pj["env1Hold"];
-    if (pj.contains("env1Decay"))   out.Decay[0]   = pj["env1Decay"];
-    if (pj.contains("env1Sustain")) out.Sustain[0] = pj["env1Sustain"];
-    if (pj.contains("env1Release")) out.Release[0] = pj["env1Release"];
-    if (pj.contains("env2Attack"))  out.Attack[1]  = pj["env2Attack"];
-    if (pj.contains("env2Hold"))    out.Hold[1]    = pj["env2Hold"];
-    if (pj.contains("env2Decay"))   out.Decay[1]   = pj["env2Decay"];
-    if (pj.contains("env2Sustain")) out.Sustain[1] = pj["env2Sustain"];
-    if (pj.contains("env2Release")) out.Release[1] = pj["env2Release"];
-
     // LFO
-    if (pj.contains("lfoSpeed"))   out.LfoSpeed   = pj["lfoSpeed"];
-    if (pj.contains("lfoWave"))    out.LfoWave    = pj["lfoWave"];
-    if (pj.contains("lfoPw"))      out.LfoPw      = pj["lfoPw"];
-    if (pj.contains("lfoTrigger")) out.LfoTrigger = pj["lfoTrigger"];
+    if (j.contains("lfoSpeed"))   out.LfoSpeed   = j["lfoSpeed"];
+    if (j.contains("lfoWave"))    out.LfoWave    = j["lfoWave"];
+    if (j.contains("lfoPw"))      out.LfoPw      = j["lfoPw"];
+    if (j.contains("lfoTrigger")) out.LfoTrigger = j["lfoTrigger"];
 
-    // Modulations
-    for (int i = 0; i < 4; i++) {
-        char key[32];
-        std::snprintf(key, sizeof(key), "mod%dSrc",    i + 1);
-        if (pj.contains(key)) out.Modulations[i].Source        = pj[key];
-        std::snprintf(key, sizeof(key), "mod%dDest",   i + 1);
-        if (pj.contains(key)) out.Modulations[i].Destination   = pj[key];
-        std::snprintf(key, sizeof(key), "mod%dAmount", i + 1);
-        if (pj.contains(key)) out.Modulations[i].Amount        = pj[key];
-        std::snprintf(key, sizeof(key), "mod%dMul",    i + 1);
-        if (pj.contains(key)) out.Modulations[i].Multiplicator = pj[key];
+    // Oscillators — stored as a "voices" array: [ {volume,coarse,fine,wave,pw,ring,sync}, ... ]
+    if (j.contains("voices") && j["voices"].is_array()) {
+        const auto& voices = j["voices"];
+        for (size_t i = 0; i < voices.size() && i < 3; i++) {
+            const auto& v = voices[i];
+            if (v.contains("volume")) out.Voice[i].Volume = v["volume"];
+            if (v.contains("coarse")) out.Voice[i].Coarse = v["coarse"];
+            if (v.contains("fine"))   out.Voice[i].Fine   = v["fine"];
+            if (v.contains("wave"))   out.Voice[i].Wave   = v["wave"];
+            if (v.contains("pw"))     out.Voice[i].Pw     = v["pw"];
+            if (v.contains("ring"))   out.Voice[i].Ring   = v["ring"];
+            if (v.contains("sync"))   out.Voice[i].Sync   = v["sync"];
+        }
+    }
+
+    // Modulation matrix — stored as a "modulations" array: [ {source,destination,amount,multiplicator}, ... ]
+    if (j.contains("modulations") && j["modulations"].is_array()) {
+        const auto& mods = j["modulations"];
+        for (size_t i = 0; i < mods.size() && i < 4; i++) {
+            const auto& m = mods[i];
+            if (m.contains("source"))        out.Modulations[i].Source        = m["source"];
+            if (m.contains("destination"))   out.Modulations[i].Destination   = m["destination"];
+            if (m.contains("amount"))        out.Modulations[i].Amount        = m["amount"];
+            if (m.contains("multiplicator")) out.Modulations[i].Multiplicator = m["multiplicator"];
+        }
     }
 
     // Filter envelope modulation
-    if (pj.contains("envMod")) out.EnvMod = pj["envMod"];
+    if (j.contains("envMod")) out.EnvMod = j["envMod"];
 
     return true;
 }
