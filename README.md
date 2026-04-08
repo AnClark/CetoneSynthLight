@@ -14,7 +14,7 @@ Originally, CetoneSynthLight was a monophonic synth, but I have added polyphony 
 
 - **3 oscillators with 5 waveforms**
   - Basic waveforms: Sine, Saw, Triangle, Square (pulse)
-  - **Nintendo® C64™-style noise generator** (switch waveform to "Noise")
+  - **Commodore 64 (C64) flavored noise generator** (switch waveform to "Noise")
 - **Analog-modelled filter**
   - **Support 7 classic filter models**: Moog, Moog2, Dirty, Ch12db, x0x, 8580, Bi12db
   - Switchable filter mode
@@ -97,7 +97,7 @@ Cetone series now use CMake as build system. **All platforms share the same comm
 You can explicitly specify built type here. For best performance, `Release` build is recommended. Optionally you can also set build type to `Debug`.
 
 ```bash
-cd minaton
+cd cetonesynthlight
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
