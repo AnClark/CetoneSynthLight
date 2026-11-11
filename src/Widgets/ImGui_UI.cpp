@@ -14,18 +14,17 @@ static const char* SYNTH_TYPE_STRING = "monophonic";
 
 void ImGuiUI::onImGuiDisplay()
 {
-    double scaleFactor = getScaleFactor() * userScaling;
-    const double initialSize = 800 * scaleFactor;
-
     //
     // "About" Window
     //
     {
-        ImGui::SetNextWindowPos(ImVec2(initialSize / 4, initialSize / 16), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(600, 250 + 15), ImGuiCond_Once);
-
         if (isAboutWindowOpen)
         {
+            const auto scaleFactor = getScaleFactor();
+
+            ImGui::SetNextWindowPos(ImVec2(100, 60 - 2) / scaleFactor, ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(600, 265), ImGuiCond_Once);
+
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             {
                 ImGui::SeparatorText("Cetone Synth Light");
