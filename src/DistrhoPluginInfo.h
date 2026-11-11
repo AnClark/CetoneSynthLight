@@ -23,6 +23,7 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #include "metadata.gen.h"    // IWYU pragma: keep
+#include "Images/CetoneArtwork.hpp"    // IWYU pragma: keep
 
 #define DISTRHO_PLUGIN_BRAND "Neotec Software, AnClark Liu"
 #define DISTRHO_PLUGIN_NAME "CetoneLight"
@@ -36,8 +37,8 @@
 
 #define DISTRHO_PLUGIN_HAS_UI 1
 #define DISTRHO_PLUGIN_HAS_EMBED_UI 1
-#define DISTRHO_DEFAULT_UI_HEIGHT 868
-#define DISTRHO_DEFAULT_UI_WIDTH 444
+#define DISTRHO_UI_DEFAULT_WIDTH  CetoneArtwork::guiWidth
+#define DISTRHO_UI_DEFAULT_HEIGHT CetoneArtwork::guiHeight
 #define DISTRHO_UI_USER_RESIZABLE 0
 
 #define DISTRHO_PLUGIN_WANT_STATE 1
