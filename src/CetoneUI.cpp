@@ -8,7 +8,7 @@ namespace Art = CetoneArtwork;
 namespace Fonts = CetoneFonts;
 
 CCetoneUI::CCetoneUI()
-    : DISTRHO::UI(Art::guiWidth, Art::guiHeight)
+    : DISTRHO::UI(Art::guiWidth, Art::guiHeight, kInternalScalingMatchingHost)
     , fImgBackground(Art::guiData, Art::guiWidth, Art::guiHeight, kImageFormatBGR)
     , fImgKnob(Art::knobData, Art::knobWidth, Art::knobHeight, kImageFormatBGRA)
     , fImgSwitchButton_ON(Art::buttons_onData, Art::buttons_onWidth, Art::buttons_onHeight, kImageFormatBGR)
