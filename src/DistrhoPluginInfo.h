@@ -22,6 +22,8 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
+#include "metadata.gen.h"    // IWYU pragma: keep
+
 #define DISTRHO_PLUGIN_BRAND "Neotec Software, AnClark Liu"
 #define DISTRHO_PLUGIN_NAME "CetoneLight"
 #define DISTRHO_PLUGIN_URI "https://github.com/AnClark/CetoneSynthLight"

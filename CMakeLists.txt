@@ -12,12 +12,16 @@ option (CETONE_INCLUDE_FACTORY_PRESETS "Include factory presets in the plugin bi
 # Explicitily specify C++ standard to prevent build error on Github CI - macOS build
 set (CMAKE_CXX_STANDARD 17)
 
+# Generate dynamic metadata file
+configure_file (cmake/metadata.h.in ${PROJECT_BINARY_DIR}/metadata.gen.h @ONLY)
+
 add_subdirectory (dpf)
 
 include_directories (   
     src/
     src/3rdparty/
     widgets/dpf-imgui/
+    ${PROJECT_BINARY_DIR}
 )
 
 set (SRC_BACKEND
