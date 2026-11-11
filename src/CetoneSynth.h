@@ -81,7 +81,7 @@ protected:
 		*/
 	uint32_t getVersion() const noexcept override
 	{
-		return d_version(1, 0, 0);
+		return d_version(PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_PATCH);
 	}
 
 	/**

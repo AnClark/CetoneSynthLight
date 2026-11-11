@@ -27,7 +27,12 @@ void ImGuiUI::onImGuiDisplay()
 
             ImGui::Begin("About " DISTRHO_PLUGIN_NAME, &isAboutWindowOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             {
-                ImGui::SeparatorText("Cetone Synth Light");
+                const String versionStr = String("Cetone Synth Light") + "  |  Version " +
+                                        String(PLUGIN_VERSION_MAJOR) + "." +
+                                        String(PLUGIN_VERSION_MINOR) + "." +
+                                        String(PLUGIN_VERSION_PATCH);
+
+                ImGui::SeparatorText(versionStr);
                 ImGui::Text("Light-weight %s analogue-style synthesizer, by Neotec Software.", SYNTH_TYPE_STRING);
                 ImGui::Text("Copyright © 2007, Neotec Software.");
                 ImGui::Text("Copyright © 2024-2026, AnClark Liu <clarklaw4701@qq.com>.");
