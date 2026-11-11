@@ -5,12 +5,32 @@ project (cetone_synth_light
     LANGUAGES C CXX
 )
 
+# Metadata (for CPack)
+set (AUTHOR "AnClark Liu")
+set (INSTALL_DIRECTORY ${PROJECT_NAME})
+set (ICON_PATH "${PROJECT_SOURCE_DIR}/Screenshot.png")  # TODO: Re-design icon
+set (PRODUCTBUILD_IDENTIFIER "com.anclark.cetone.light")
+
 # Options for Cetone build
 option (CETONE_ENABLE_POLYPHONY "Enable polyphonic features of Cetone synthesizer" ON)
 option (CETONE_INCLUDE_FACTORY_PRESETS "Include factory presets in the plugin binary (may increase binary size)" OFF)
 
 # Explicitily specify C++ standard to prevent build error on Github CI - macOS build
 set (CMAKE_CXX_STANDARD 17)
+
+# GitHub CI's Ubuntu runner cannot directly run lv2-ttl-generator.exe, even though Wine and wine-binfmt is installed.
+# And, LV2 is not so common on Windows (only REAPER, Ardour and Harrison Mixbus support LV2 on Windows).
+# So disable LV2 on Windows by default.
+option (CONFIG_BUILD_LV2_ON_WINDOWS "Build LV2 on Windows (including cross-compiling)." OFF)
+if (WIN32 AND CONFIG_BUILD_LV2_ON_WINDOWS)
+    message (STATUS "Win32 environment and LV2 build is enabled, will build LV2 plugin")
+    set (TARGET_LV2 lv2)
+elseif (WIN32)
+    message (STATUS "Win32 environment and LV2 build is disabled. Bypass LV2")
+else ()
+    message (STATUS "Non-Win32 environment, will build LV2 plugin")
+    set (TARGET_LV2 lv2)
+endif ()
 
 # Generate dynamic metadata file
 configure_file (cmake/metadata.h.in ${PROJECT_BINARY_DIR}/metadata.gen.h @ONLY)
@@ -50,7 +70,7 @@ else ()
 endif ()
 
 dpf_add_plugin (${PROJECT_NAME}
-    TARGETS vst2 vst3 lv2 clap jack
+    TARGETS vst2 vst3 ${TARGET_LV2} clap jack
     FILES_DSP
         src/CetoneSynth.cpp
         src/CetoneSynthDPF.cpp
@@ -103,3 +123,6 @@ if (CETONE_INCLUDE_FACTORY_PRESETS)
     )
     add_dependencies (${PROJECT_NAME}-ui generate_factory_presets)
 endif ()
+
+# CPack stuff
+include (cmake/Packaging.cmake)
